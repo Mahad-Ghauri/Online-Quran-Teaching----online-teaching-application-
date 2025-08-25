@@ -5,7 +5,7 @@ import 'package:qari_connect/views/interface/auth/auth_selection_screen.dart';
 import 'package:qari_connect/views/interface/authentication/sign_in_screen.dart';
 import 'package:qari_connect/views/interface/authentication/sign_up_screen.dart';
 import 'package:qari_connect/views/interface/dashboards/qari/qari_main_dashboard.dart';
-import 'package:qari_connect/views/interface/dashboards/student_dashboard.dart';
+import 'package:qari_connect/views/interface/dashboards/student/student_main_dashboard.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -47,7 +47,7 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/student-dashboard',
-      builder: (context, state) => const StudentDashboard(),
+      builder: (context, state) => const StudentMainDashboard(),
     ),
     
     // Legacy routes for backward compatibility

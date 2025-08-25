@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:qari_connect/views/screens/splashscreen.dart';
 import 'package:qari_connect/views/interface/auth/auth_selection_screen.dart';
+import 'package:qari_connect/views/interface/dashboards/qari/qari_main_dashboard.dart';
+import 'package:qari_connect/views/interface/dashboards/student/student_main_dashboard.dart';
 import 'package:qari_connect/controllers/services/authentication/auth_services.dart';
 
 class AuthGate extends StatefulWidget {
