@@ -219,9 +219,21 @@ class AuthService {
   static Future<UserModel?> getCurrentUserProfile() async {
     try {
       final user = currentUser;
-      if (user == null) return null;
-      return await FirestoreService.getUserProfile(user.uid);
+      if (user == null) {
+        print('DEBUG: AuthService - No current Firebase user');
+        return null;
+      }
+      print('DEBUG: AuthService - Current Firebase user ID: ${user.uid}');
+      print('DEBUG: AuthService - Current Firebase user email: ${user.email}');
+      final userProfile = await FirestoreService.getUserProfile(user.uid);
+      if (userProfile != null) {
+        print('DEBUG: AuthService - Retrieved user profile: ${userProfile.name} (${userProfile.role.name})');
+      } else {
+        print('DEBUG: AuthService - No user profile found for ID: ${user.uid}');
+      }
+      return userProfile;
     } catch (e) {
+      print('DEBUG: AuthService - Error getting current user profile: $e');
       return null;
     }
   }

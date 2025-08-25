@@ -1087,6 +1087,8 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
+              // Clear all provider data before signing out
+              providers.AuthProvider.clearAllProviders(context);
               await authProvider.signOut();
             },
             style: ElevatedButton.styleFrom(

@@ -68,11 +68,24 @@ class _QariProfilePageState extends State<QariProfilePage> {
           if (_isEditing) ...[
             TextButton(
               onPressed: _cancelEdit,
-              child: const Text('Cancel'),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
-            TextButton(
-              onPressed: _saveProfile,
-              child: const Text('Save'),
+            Container(
+              margin: const EdgeInsets.only(right: 8),
+              child: ElevatedButton(
+                onPressed: _saveProfile,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Save'),
+              ),
             ),
           ] else
             IconButton(
@@ -735,6 +748,8 @@ class _QariProfilePageState extends State<QariProfilePage> {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
+              // Clear all provider data before signing out
+              AuthProvider.clearAllProviders(context);
               await AuthService.signOut();
               if (mounted) {
                 context.go('/sign-in');

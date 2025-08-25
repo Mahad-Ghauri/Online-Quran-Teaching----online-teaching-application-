@@ -3,6 +3,8 @@
 
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/core_models.dart';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
@@ -44,6 +46,7 @@ class AuthProvider extends ChangeNotifier {
     required String password,
     required String name,
     required UserRole role,
+    String? phone,
   }) async {
     _setLoading(true);
     try {
@@ -52,6 +55,7 @@ class AuthProvider extends ChangeNotifier {
         password: password,
         name: name,
         role: role,
+        phone: phone,
       );
       _clearError();
       notifyListeners();
@@ -98,6 +102,27 @@ class AuthProvider extends ChangeNotifier {
       _setError(e.toString());
     } finally {
       _setLoading(false);
+    }
+  }
+
+  /// Clear all app data (should be called from UI when signing out)
+  static void clearAllProviders(BuildContext context) {
+    try {
+      // Clear QariProvider
+      final qariProvider = context.read<QariProvider>();
+      qariProvider.clear();
+      
+      // Clear BookingProvider  
+      final bookingProvider = context.read<BookingProvider>();
+      bookingProvider.clear();
+      
+      // Clear ReviewProvider if it has a clear method
+      // final reviewProvider = context.read<ReviewProvider>();
+      // reviewProvider.clear();
+      
+      debugPrint('✅ All providers cleared successfully');
+    } catch (e) {
+      debugPrint('❌ Error clearing providers: $e');
     }
   }
 
@@ -177,6 +202,7 @@ class QariProvider extends ChangeNotifier {
   // Stream subscriptions for real-time updates
   StreamSubscription<List<QariProfile>>? _verifiedQarisSubscription;
   StreamSubscription<QariProfile?>? _currentQariProfileSubscription;
+  bool _isListeningToVerifiedQaris = false;
 
   List<QariProfile> get verifiedQaris => _verifiedQaris;
   QariProfile? get currentQariProfile => _currentQariProfile;
@@ -185,9 +211,15 @@ class QariProvider extends ChangeNotifier {
 
   /// Start listening to verified Qaris in real-time
   void startListeningToVerifiedQaris() {
+    if (_isListeningToVerifiedQaris) {
+      print('DEBUG: QariProvider - Already listening to verified Qaris, skipping');
+      return;
+    }
+    
     print('DEBUG: QariProvider - startListeningToVerifiedQaris called');
     _setLoading(true);
     _verifiedQarisSubscription?.cancel();
+    _isListeningToVerifiedQaris = true;
     
     _verifiedQarisSubscription = FirestoreService.listenToVerifiedQaris().listen(
       (qaris) {
@@ -207,15 +239,18 @@ class QariProvider extends ChangeNotifier {
 
   /// Start listening to current Qari profile in real-time
   void startListeningToCurrentQariProfile(String qariId) {
+    print('DEBUG: QariProvider - startListeningToCurrentQariProfile called with qariId: $qariId');
     _currentQariProfileSubscription?.cancel();
     
     _currentQariProfileSubscription = FirestoreService.listenToQariProfile(qariId).listen(
       (profile) {
+        print('DEBUG: QariProvider - Received profile for qariId $qariId: ${profile?.qariId} (name: ${profile != null ? 'name from user data' : 'null'})');
         _currentQariProfile = profile;
         _clearError();
         notifyListeners();
       },
       onError: (error) {
+        print('DEBUG: QariProvider - Error loading Qari profile for $qariId: $error');
         _setError('Failed to load Qari profile: $error');
       },
     );
@@ -227,6 +262,16 @@ class QariProvider extends ChangeNotifier {
     _currentQariProfileSubscription?.cancel();
     _verifiedQarisSubscription = null;
     _currentQariProfileSubscription = null;
+  }
+
+  /// Clear all data (called on logout)
+  void clear() {
+    stopListening();
+    _verifiedQaris = [];
+    _currentQariProfile = null;
+    _isLoading = false;
+    _error = null;
+    notifyListeners();
   }
 
   /// Load all verified Qaris for students (fallback method)
@@ -393,6 +438,16 @@ class BookingProvider extends ChangeNotifier {
   void stopListening() {
     _userBookingsSubscription?.cancel();
     _userBookingsSubscription = null;
+  }
+
+  /// Clear all data (called on logout)
+  void clear() {
+    stopListening();
+    _userBookings = [];
+    _upcomingBookings = [];
+    _isLoading = false;
+    _error = null;
+    notifyListeners();
   }
 
   @override

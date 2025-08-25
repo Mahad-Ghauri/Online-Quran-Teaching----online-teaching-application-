@@ -50,12 +50,18 @@ class FirestoreService {
   /// Get user profile by ID
   static Future<UserModel?> getUserProfile(String userId) async {
     try {
+      print('DEBUG: FirestoreService - Getting user profile for ID: $userId');
       final doc = await _users.doc(userId).get();
       if (doc.exists) {
+        final userData = doc.data() as Map<String, dynamic>;
+        print('DEBUG: FirestoreService - Found user document: ${userData['name']} (${userData['role']})');
         return UserModel.fromFirestore(doc);
+      } else {
+        print('DEBUG: FirestoreService - No document found for user ID: $userId');
       }
       return null;
     } catch (e) {
+      print('DEBUG: FirestoreService - Error getting user profile: $e');
       throw Exception('Failed to get user profile: $e');
     }
   }
@@ -379,10 +385,15 @@ class FirestoreService {
 
   /// Listen to Qari profile changes
   static Stream<QariProfile?> listenToQariProfile(String qariId) {
+    print('DEBUG: FirestoreService.listenToQariProfile - Looking for qariId: $qariId');
     return _qariProfiles.doc(qariId).snapshots().map((snapshot) {
+      print('DEBUG: FirestoreService.listenToQariProfile - Snapshot exists: ${snapshot.exists} for qariId: $qariId');
       if (snapshot.exists) {
+        final data = snapshot.data() as Map<String, dynamic>;
+        print('DEBUG: FirestoreService.listenToQariProfile - Found qari profile data: $data');
         return QariProfile.fromFirestore(snapshot);
       }
+      print('DEBUG: FirestoreService.listenToQariProfile - No qari profile found for qariId: $qariId');
       return null;
     });
   }

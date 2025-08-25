@@ -74,59 +74,112 @@ class _AvailabilityTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Weekly Overview
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'This Week\'s Availability',
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
+    return Consumer<QariProvider>(
+      builder: (context, qariProvider, child) {
+        final qariProfile = qariProvider.currentQariProfile;
+        final availableSlots = qariProfile?.availableSlots ?? [];
+        
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Weekly Overview
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'This Week\'s Availability',
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _buildWeeklyAvailability(availableSlots),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              // Available Time Slots
+              Text(
+                'Available Time Slots',
+                style: GoogleFonts.merriweather(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              if (availableSlots.isEmpty)
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.schedule_outlined,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No availability slots',
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Add your available time slots to receive bookings',
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: Colors.grey[500],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  _buildWeeklyAvailability(),
-                ],
-              ),
-            ),
+                )
+              else
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: availableSlots.length,
+                    itemBuilder: (context, index) {
+                      final slot = availableSlots[index];
+                      return _buildAvailabilitySlot(slot);
+                    },
+                  ),
+                ),
+            ],
           ),
-          const SizedBox(height: 16),
-          
-          // Available Time Slots
-          Text(
-            'Available Time Slots',
-            style: GoogleFonts.merriweather(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _mockAvailableSlots.length,
-              itemBuilder: (context, index) {
-                final slot = _mockAvailableSlots[index];
-                return _buildAvailabilitySlot(slot);
-              },
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildWeeklyAvailability() {
+  Widget _buildWeeklyAvailability(List<TimeSlot> availableSlots) {
     final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    final availability = [3, 2, 4, 1, 3, 2, 0]; // Number of slots per day
+    final now = DateTime.now();
+    final weekStart = now.subtract(Duration(days: now.weekday - 1));
+    
+    // Calculate slots for each day of the current week
+    final availability = List.generate(7, (index) {
+      final day = weekStart.add(Duration(days: index));
+      return availableSlots.where((slot) {
+        return slot.date.day == day.day &&
+               slot.date.month == day.month &&
+               slot.date.year == day.year;
+      }).length;
+    });
     
     return Builder(
       builder: (context) => Row(
@@ -176,7 +229,18 @@ class _AvailabilityTab extends StatelessWidget {
     );
   }
 
-  Widget _buildAvailabilitySlot(Map<String, dynamic> slot) {
+  Widget _buildAvailabilitySlot(TimeSlot slot) {
+    final days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    final dayName = days[slot.date.weekday - 1];
+    
+    String formatTime(DateTime time) {
+      final hour = time.hour;
+      final minute = time.minute;
+      final period = hour >= 12 ? 'PM' : 'AM';
+      final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+      return '${displayHour}:${minute.toString().padLeft(2, '0')} $period';
+    }
+    
     return Builder(
       builder: (context) => Container(
         margin: const EdgeInsets.only(bottom: 8),
@@ -185,9 +249,7 @@ class _AvailabilityTab extends StatelessWidget {
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: slot['isBooked'] 
-                ? Colors.orange.withOpacity(0.3)
-                : Colors.green.withOpacity(0.3),
+            color: Colors.green.withOpacity(0.3),
           ),
         ),
         child: Row(
@@ -195,17 +257,15 @@ class _AvailabilityTab extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: slot['isBooked'] 
-                    ? Colors.orange.withOpacity(0.1)
-                    : Colors.green.withOpacity(0.1),
+                color: Colors.green.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
-                slot['day'],
+                dayName,
                 style: GoogleFonts.poppins(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: slot['isBooked'] ? Colors.orange[700] : Colors.green[700],
+                  color: Colors.green[700],
                 ),
               ),
             ),
@@ -215,22 +275,20 @@ class _AvailabilityTab extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${slot['startTime']} - ${slot['endTime']}',
+                    '${formatTime(slot.startTime)} - ${formatTime(slot.endTime)}',
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
                   ),
-                  if (slot['isBooked']) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      'Booked by ${slot['studentName']}',
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: Colors.orange[700],
-                      ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${slot.date.day}/${slot.date.month}/${slot.date.year}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey[600],
                     ),
-                  ],
+                  ),
                 ],
               ),
             ),
@@ -254,36 +312,6 @@ class _AvailabilityTab extends StatelessWidget {
       ),
     );
   }
-
-  // Mock data
-  static const List<Map<String, dynamic>> _mockAvailableSlots = [
-    {
-      'day': 'Monday',
-      'startTime': '9:00 AM',
-      'endTime': '10:00 AM',
-      'isBooked': false,
-    },
-    {
-      'day': 'Monday',
-      'startTime': '2:00 PM',
-      'endTime': '3:00 PM',
-      'isBooked': true,
-      'studentName': 'Ahmed Al-Rashid',
-    },
-    {
-      'day': 'Tuesday',
-      'startTime': '10:00 AM',
-      'endTime': '11:00 AM',
-      'isBooked': false,
-    },
-    {
-      'day': 'Wednesday',
-      'startTime': '4:00 PM',
-      'endTime': '5:00 PM',
-      'isBooked': true,
-      'studentName': 'Fatima Khan',
-    },
-  ];
 }
 
 class _BookingsTab extends StatelessWidget {
@@ -470,166 +498,6 @@ class _BookingsTab extends StatelessWidget {
   String _formatTime(DateTime time) {
     return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
   }
-
-  Widget _buildBookingCard(Map<String, dynamic> booking) {
-    return Builder(
-      builder: (context) {
-        Color statusColor;
-        switch (booking['status']) {
-          case 'confirmed':
-            statusColor = Colors.green;
-            break;
-          case 'pending':
-            statusColor = Colors.orange;
-            break;
-          case 'completed':
-            statusColor = Colors.blue;
-            break;
-          default:
-            statusColor = Colors.grey;
-        }
-
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: statusColor.withOpacity(0.3),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    booking['subject'],
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      booking['status'].toUpperCase(),
-                      style: GoogleFonts.poppins(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: statusColor,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(
-                    Icons.person,
-                    size: 16,
-                    color: Colors.grey[600],
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    booking['studentName'],
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Icon(
-                    Icons.access_time,
-                    size: 16,
-                    color: Colors.grey[600],
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${booking['date']} • ${booking['time']}',
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  if (booking['status'] == 'confirmed') ...[
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          // TODO: Start session
-                        },
-                        icon: const Icon(Icons.videocam),
-                        label: const Text('Start Session'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-                  OutlinedButton(
-                    onPressed: () {
-                      // TODO: View details
-                    },
-                    child: const Text('Details'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  // Mock data
-  static const List<Map<String, dynamic>> _mockBookings = [
-    {
-      'subject': 'Tajweed Basics',
-      'studentName': 'Ahmed Al-Rashid',
-      'date': 'Today',
-      'time': '2:00 PM - 3:00 PM',
-      'status': 'confirmed',
-    },
-    {
-      'subject': 'Quran Memorization',
-      'studentName': 'Fatima Khan',
-      'date': 'Today',
-      'time': '4:00 PM - 5:00 PM',
-      'status': 'confirmed',
-    },
-    {
-      'subject': 'Arabic Grammar',
-      'studentName': 'Omar Hassan',
-      'date': 'Tomorrow',
-      'time': '10:00 AM - 11:00 AM',
-      'status': 'pending',
-    },
-    {
-      'subject': 'Quran Reading',
-      'studentName': 'Aisha Mohamed',
-      'date': 'Yesterday',
-      'time': '3:00 PM - 4:00 PM',
-      'status': 'completed',
-    },
-  ];
 }
 
 class _AddAvailabilityDialog extends StatefulWidget {

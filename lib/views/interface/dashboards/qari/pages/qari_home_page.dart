@@ -405,70 +405,135 @@ class _QariHomePageState extends State<QariHomePage> {
   }
 
   Widget _buildUpcomingBookings() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Consumer<BookingProvider>(
+      builder: (context, bookingProvider, child) {
+        final upcomingBookings = bookingProvider.upcomingBookings;
+        
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Upcoming Classes',
-              style: GoogleFonts.merriweather(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Upcoming Classes',
+                  style: GoogleFonts.merriweather(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // TODO: Navigate to full schedule
+                  },
+                  child: const Text('View All'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            
+            if (upcomingBookings.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.grey.withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.event_busy,
+                      size: 48,
+                      color: Colors.grey[400],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'No upcoming classes',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Your scheduled classes will appear here',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Colors.grey[500],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              )
+            else
+              ...upcomingBookings.take(3).map((booking) => 
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _buildBookingCard(booking),
+                ),
               ),
-            ),
-            TextButton(
-              onPressed: () {
-                // TODO: Navigate to full schedule
-              },
-              child: const Text('View All'),
-            ),
           ],
-        ),
-        const SizedBox(height: 12),
-        // Mock upcoming bookings
-        _buildBookingCard(
-          'Tajweed Basics',
-          'Ahmed Al-Rashid',
-          '2:00 PM - 3:00 PM',
-          'Today',
-          Colors.green,
-        ),
-        const SizedBox(height: 8),
-        _buildBookingCard(
-          'Quran Memorization',
-          'Fatima Khan',
-          '4:00 PM - 5:00 PM',
-          'Today',
-          Colors.blue,
-        ),
-        const SizedBox(height: 8),
-        _buildBookingCard(
-          'Arabic Grammar',
-          'Omar Hassan',
-          '10:00 AM - 11:00 AM',
-          'Tomorrow',
-          Colors.orange,
-        ),
-      ],
+        );
+      },
     );
   }
 
-  Widget _buildBookingCard(
-    String subject,
-    String studentName,
-    String time,
-    String date,
-    Color color,
-  ) {
+  Widget _buildBookingCard(Booking booking) {
+    final startTime = booking.slot.startTime;
+    final endTime = booking.slot.endTime;
+    
+    final now = DateTime.now();
+    final bookingDate = booking.slot.date;
+    final isToday = bookingDate.day == now.day && 
+                    bookingDate.month == now.month && 
+                    bookingDate.year == now.year;
+    final isTomorrow = bookingDate.day == now.add(const Duration(days: 1)).day && 
+                       bookingDate.month == now.add(const Duration(days: 1)).month && 
+                       bookingDate.year == now.add(const Duration(days: 1)).year;
+    
+    String dateText;
+    if (isToday) {
+      dateText = 'Today';
+    } else if (isTomorrow) {
+      dateText = 'Tomorrow';
+    } else {
+      dateText = '${bookingDate.day}/${bookingDate.month}';
+    }
+    
+    // Format time to display as HH:MM
+    String formatTime(DateTime time) {
+      return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+    }
+    
+    Color cardColor;
+    switch (booking.status) {
+      case BookingStatus.confirmed:
+        cardColor = Colors.green;
+        break;
+      case BookingStatus.pending:
+        cardColor = Colors.orange;
+        break;
+      case BookingStatus.completed:
+        cardColor = Colors.blue;
+        break;
+      case BookingStatus.cancelled:
+        cardColor = Colors.red;
+        break;
+    }
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: color.withOpacity(0.2),
+          color: cardColor.withOpacity(0.2),
           width: 1,
         ),
       ),
@@ -478,7 +543,7 @@ class _QariHomePageState extends State<QariHomePage> {
             width: 4,
             height: 50,
             decoration: BoxDecoration(
-              color: color,
+              color: cardColor,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -488,7 +553,7 @@ class _QariHomePageState extends State<QariHomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  subject,
+                  'Quran Session',
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
@@ -496,7 +561,7 @@ class _QariHomePageState extends State<QariHomePage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Student: $studentName',
+                  'Booking ID: ${booking.id.substring(0, 8)}...',
                   style: GoogleFonts.poppins(
                     fontSize: 12,
                     color: Colors.grey[600],
@@ -512,7 +577,7 @@ class _QariHomePageState extends State<QariHomePage> {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '$time • $date',
+                      '${formatTime(startTime)} - ${formatTime(endTime)} • $dateText',
                       style: GoogleFonts.poppins(
                         fontSize: 12,
                         color: Colors.grey[600],
@@ -520,16 +585,36 @@ class _QariHomePageState extends State<QariHomePage> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: cardColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    booking.status.name.toUpperCase(),
+                    style: GoogleFonts.poppins(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: cardColor,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
           IconButton(
-            onPressed: () {
-              // TODO: Start/Join session
-            },
+            onPressed: booking.status == BookingStatus.confirmed 
+                ? () {
+                    // TODO: Start/Join session
+                  }
+                : null,
             icon: Icon(
               Icons.videocam,
-              color: color,
+              color: booking.status == BookingStatus.confirmed 
+                  ? cardColor 
+                  : Colors.grey[400],
             ),
           ),
         ],
@@ -538,37 +623,94 @@ class _QariHomePageState extends State<QariHomePage> {
   }
 
   Widget _buildRecentActivity() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Recent Activity',
-          style: GoogleFonts.merriweather(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 12),
-        _buildActivityItem(
-          'Session completed with Ahmed Al-Rashid',
-          '2 hours ago',
-          Icons.check_circle,
-          Colors.green,
-        ),
-        _buildActivityItem(
-          'New booking from Fatima Khan',
-          '5 hours ago',
-          Icons.event,
-          Colors.blue,
-        ),
-        _buildActivityItem(
-          'Payment received - \$45.00',
-          '1 day ago',
-          Icons.payment,
-          Colors.orange,
-        ),
-      ],
+    return Consumer<BookingProvider>(
+      builder: (context, bookingProvider, child) {
+        final allBookings = bookingProvider.userBookings;
+        final recentBookings = allBookings
+            .where((booking) => booking.status == BookingStatus.completed)
+            .toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Recent Activity',
+              style: GoogleFonts.merriweather(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            
+            if (recentBookings.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.grey.withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.history,
+                      size: 48,
+                      color: Colors.grey[400],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'No recent activity',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Your completed sessions will appear here',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Colors.grey[500],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              )
+            else
+              ...recentBookings.take(3).map((booking) {
+                final timeAgo = _getTimeAgo(booking.createdAt);
+                return _buildActivityItem(
+                  'Session completed - \$${booking.price.toStringAsFixed(0)}',
+                  timeAgo,
+                  Icons.check_circle,
+                  Colors.green,
+                );
+              }),
+          ],
+        );
+      },
     );
+  }
+
+  String _getTimeAgo(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+    
+    if (difference.inDays > 0) {
+      return '${difference.inDays} day${difference.inDays == 1 ? '' : 's'} ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours} hour${difference.inHours == 1 ? '' : 's'} ago';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes} minute${difference.inMinutes == 1 ? '' : 's'} ago';
+    } else {
+      return 'Just now';
+    }
   }
 
   Widget _buildActivityItem(

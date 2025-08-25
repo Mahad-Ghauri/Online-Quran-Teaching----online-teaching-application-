@@ -95,97 +95,142 @@ class _QariEarningsPageState extends State<QariEarningsPage> {
   }
 
   Widget _buildEarningsOverview() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.green,
-            Colors.green.shade700,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.green.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Total Earnings',
-                style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                _selectedPeriod,
-                style: GoogleFonts.poppins(
-                  color: Colors.white.withOpacity(0.8),
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'R 4,250.00', // Mock total earnings
-            style: GoogleFonts.merriweather(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
+    return Consumer<BookingProvider>(
+      builder: (context, bookingProvider, child) {
+        final allBookings = bookingProvider.userBookings;
+        final completedBookings = allBookings
+            .where((booking) => booking.status == BookingStatus.completed)
+            .toList();
+        
+        // Filter by selected period
+        final filteredBookings = _filterBookingsByPeriod(completedBookings);
+        
+        final totalEarnings = filteredBookings
+            .fold<double>(0, (sum, booking) => sum + booking.price);
+        final sessionCount = filteredBookings.length;
+        final avgPerSession = sessionCount > 0 ? totalEarnings / sessionCount : 0;
+        
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.green,
+                Colors.green.shade700,
+              ],
             ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildEarningsStat(
-                  'Sessions',
-                  '28',
-                  Icons.school,
-                ),
-              ),
-              Container(
-                width: 1,
-                height: 40,
-                color: Colors.white.withOpacity(0.3),
-              ),
-              Expanded(
-                child: _buildEarningsStat(
-                  'Avg/Session',
-                  'R 152',
-                  Icons.trending_up,
-                ),
-              ),
-              Container(
-                width: 1,
-                height: 40,
-                color: Colors.white.withOpacity(0.3),
-              ),
-              Expanded(
-                child: _buildEarningsStat(
-                  'Commission',
-                  '15%',
-                  Icons.percent,
-                ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.green.withOpacity(0.3),
+                blurRadius: 10,
+                offset: const Offset(0, 5),
               ),
             ],
           ),
-        ],
-      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Total Earnings',
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    _selectedPeriod,
+                    style: GoogleFonts.poppins(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'R ${totalEarnings.toStringAsFixed(2)}',
+                style: GoogleFonts.merriweather(
+                  color: Colors.white,
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildEarningsStat(
+                      'Sessions',
+                      sessionCount.toString(),
+                      Icons.school,
+                    ),
+                  ),
+                  Container(
+                    width: 1,
+                    height: 40,
+                    color: Colors.white.withOpacity(0.3),
+                  ),
+                  Expanded(
+                    child: _buildEarningsStat(
+                      'Avg/Session',
+                      'R ${avgPerSession.toStringAsFixed(0)}',
+                      Icons.trending_up,
+                    ),
+                  ),
+                  Container(
+                    width: 1,
+                    height: 40,
+                    color: Colors.white.withOpacity(0.3),
+                  ),
+                  Expanded(
+                    child: _buildEarningsStat(
+                      'Commission',
+                      '15%',
+                      Icons.percent,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
+  }
+
+  List<Booking> _filterBookingsByPeriod(List<Booking> bookings) {
+    final now = DateTime.now();
+    DateTime startDate;
+    
+    switch (_selectedPeriod) {
+      case 'This Week':
+        startDate = now.subtract(Duration(days: now.weekday - 1));
+        break;
+      case 'This Month':
+        startDate = DateTime(now.year, now.month, 1);
+        break;
+      case 'Last Month':
+        final lastMonth = DateTime(now.year, now.month - 1, 1);
+        final lastMonthEnd = DateTime(now.year, now.month, 0);
+        return bookings.where((booking) {
+          return booking.createdAt.isAfter(lastMonth) && 
+                 booking.createdAt.isBefore(lastMonthEnd);
+        }).toList();
+      case 'This Year':
+        startDate = DateTime(now.year, 1, 1);
+        break;
+      default:
+        startDate = DateTime(now.year, now.month, 1);
+    }
+    
+    return bookings.where((booking) => booking.createdAt.isAfter(startDate)).toList();
   }
 
   Widget _buildEarningsStat(String label, String value, IconData icon) {
@@ -217,26 +262,46 @@ class _QariEarningsPageState extends State<QariEarningsPage> {
   }
 
   Widget _buildQuickStats() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildStatCard(
-            'Pending',
-            'R 320.00',
-            Icons.schedule,
-            Colors.orange,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildStatCard(
-            'Paid Out',
-            'R 3,930.00',
-            Icons.check_circle,
-            Colors.green,
-          ),
-        ),
-      ],
+    return Consumer<BookingProvider>(
+      builder: (context, bookingProvider, child) {
+        final allBookings = bookingProvider.userBookings;
+        final completedBookings = allBookings
+            .where((booking) => booking.status == BookingStatus.completed)
+            .toList();
+        final pendingBookings = allBookings
+            .where((booking) => booking.status == BookingStatus.pending)
+            .toList();
+        
+        final filteredCompleted = _filterBookingsByPeriod(completedBookings);
+        final filteredPending = _filterBookingsByPeriod(pendingBookings);
+        
+        final paidOut = filteredCompleted
+            .fold<double>(0, (sum, booking) => sum + booking.price);
+        final pending = filteredPending
+            .fold<double>(0, (sum, booking) => sum + booking.price);
+        
+        return Row(
+          children: [
+            Expanded(
+              child: _buildStatCard(
+                'Pending',
+                'R ${pending.toStringAsFixed(2)}',
+                Icons.schedule,
+                Colors.orange,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildStatCard(
+                'Paid Out',
+                'R ${paidOut.toStringAsFixed(2)}',
+                Icons.check_circle,
+                Colors.green,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -354,61 +419,96 @@ class _QariEarningsPageState extends State<QariEarningsPage> {
   }
 
   Widget _buildRecentTransactions() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Consumer<BookingProvider>(
+      builder: (context, bookingProvider, child) {
+        final allBookings = bookingProvider.userBookings;
+        final recentBookings = allBookings
+            .where((booking) => booking.status == BookingStatus.completed)
+            .toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Recent Transactions',
-              style: GoogleFonts.merriweather(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Recent Transactions',
+                  style: GoogleFonts.merriweather(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // TODO: Navigate to full transaction history
+                  },
+                  child: const Text('View All'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            
+            if (recentBookings.isEmpty)
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.grey.withOpacity(0.2),
+                    width: 1,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.receipt_long,
+                      size: 48,
+                      color: Colors.grey[400],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'No transactions yet',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Your completed sessions will appear here',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Colors.grey[500],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              )
+            else
+              ...recentBookings.take(5).map((booking) => 
+                _buildTransactionCard(booking),
               ),
-            ),
-            TextButton(
-              onPressed: () {
-                // TODO: Navigate to full transaction history
-              },
-              child: const Text('View All'),
-            ),
           ],
-        ),
-        const SizedBox(height: 12),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: _mockTransactions.length,
-          itemBuilder: (context, index) {
-            final transaction = _mockTransactions[index];
-            return _buildTransactionCard(transaction);
-          },
-        ),
-      ],
+        );
+      },
     );
   }
 
-  Widget _buildTransactionCard(Map<String, dynamic> transaction) {
-    Color statusColor;
-    IconData statusIcon;
+  Widget _buildTransactionCard(Booking booking) {
+    final statusColor = Colors.green;
+    const statusIcon = Icons.check_circle;
     
-    switch (transaction['status']) {
-      case 'completed':
-        statusColor = Colors.green;
-        statusIcon = Icons.check_circle;
-        break;
-      case 'pending':
-        statusColor = Colors.orange;
-        statusIcon = Icons.schedule;
-        break;
-      case 'processing':
-        statusColor = Colors.blue;
-        statusIcon = Icons.sync;
-        break;
-      default:
-        statusColor = Colors.grey;
-        statusIcon = Icons.info;
+    String formatDate(DateTime date) {
+      const months = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      ];
+      return '${months[date.month - 1]} ${date.day}, ${date.year}';
     }
 
     return Container(
@@ -441,7 +541,7 @@ class _QariEarningsPageState extends State<QariEarningsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  transaction['description'],
+                  'Session: Quran Teaching',
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w500,
                     fontSize: 14,
@@ -449,7 +549,7 @@ class _QariEarningsPageState extends State<QariEarningsPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  transaction['date'],
+                  formatDate(booking.createdAt),
                   style: GoogleFonts.poppins(
                     fontSize: 12,
                     color: Colors.grey[600],
@@ -462,7 +562,7 @@ class _QariEarningsPageState extends State<QariEarningsPage> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                transaction['amount'],
+                'R ${booking.price.toStringAsFixed(2)}',
                 style: GoogleFonts.poppins(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -471,7 +571,7 @@ class _QariEarningsPageState extends State<QariEarningsPage> {
               ),
               const SizedBox(height: 2),
               Text(
-                transaction['status'].toUpperCase(),
+                'COMPLETED',
                 style: GoogleFonts.poppins(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
@@ -524,32 +624,4 @@ class _QariEarningsPageState extends State<QariEarningsPage> {
       ),
     );
   }
-
-  // Mock data
-  static const List<Map<String, dynamic>> _mockTransactions = [
-    {
-      'description': 'Session: Tajweed Basics',
-      'amount': 'R 150.00',
-      'date': 'Aug 24, 2025',
-      'status': 'completed',
-    },
-    {
-      'description': 'Session: Quran Memorization',
-      'amount': 'R 170.00',
-      'date': 'Aug 23, 2025',
-      'status': 'pending',
-    },
-    {
-      'description': 'Session: Arabic Grammar',
-      'amount': 'R 140.00',
-      'date': 'Aug 22, 2025',
-      'status': 'processing',
-    },
-    {
-      'description': 'Weekly Payout',
-      'amount': 'R 680.00',
-      'date': 'Aug 20, 2025',
-      'status': 'completed',
-    },
-  ];
 }

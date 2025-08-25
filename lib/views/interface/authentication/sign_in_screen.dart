@@ -3,12 +3,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:qari_connect/components/auth_form.dart';
 import 'package:qari_connect/components/auth_header.dart';
 import 'package:qari_connect/components/glassmorphism_button.dart';
 import 'package:qari_connect/components/gradient_background.dart';
 import 'package:qari_connect/controllers/input_controller.dart';
-import 'package:qari_connect/services/auth_service.dart';
+import 'package:qari_connect/providers/app_providers.dart';
+import 'package:qari_connect/models/core_models.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -33,18 +35,21 @@ class _SignInScreenState extends State<SignInScreen> {
 
     setState(() => inputs.loading = true);
     try {
-      final role = await AuthService.instance.signIn(
+      final authProvider = context.read<AuthProvider>();
+      final success = await authProvider.signIn(
         email: inputs.emailController.text,
         password: inputs.passwordController.text,
       );
 
       if (!mounted) return;
 
-      final normalized = role?.toLowerCase();
-      if (normalized == 'qari') {
-        context.go('/qari-dashboard');
-      } else {
-        context.go('/student-dashboard');
+      if (success && authProvider.currentUser != null) {
+        final userRole = authProvider.currentUser!.role;
+        if (userRole == UserRole.qari) {
+          context.go('/qari-dashboard');
+        } else {
+          context.go('/student-dashboard');
+        }
       }
     } on Exception catch (e) {
       if (!mounted) return;

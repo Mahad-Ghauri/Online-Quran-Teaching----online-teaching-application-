@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qari_connect/services/auth_service.dart';
+import 'package:qari_connect/providers/app_providers.dart';
 
 class StudentDrawer extends StatelessWidget {
   const StudentDrawer({super.key});
@@ -387,6 +388,8 @@ class StudentDrawer extends StatelessWidget {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
+              // Clear all provider data before signing out
+              AuthProvider.clearAllProviders(context);
               await AuthService.signOut();
               if (context.mounted) {
                 context.go('/sign-in');

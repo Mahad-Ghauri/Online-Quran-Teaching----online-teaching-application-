@@ -2,12 +2,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:qari_connect/components/auth_form.dart';
 import 'package:qari_connect/components/auth_header.dart';
 import 'package:qari_connect/components/gradient_background.dart';
 import 'package:qari_connect/components/glassmorphism_button.dart';
 import 'package:qari_connect/controllers/input_controller.dart';
-import 'package:qari_connect/services/auth_service.dart';
+import 'package:qari_connect/providers/app_providers.dart';
+import 'package:qari_connect/models/core_models.dart';
 
 class SignUpScreen extends StatefulWidget {
   final String? initialRole; // expects 'qari' or 'student' (any case)
@@ -59,19 +61,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     setState(() => inputs.loading = true);
     try {
-      await AuthService.instance.signUp(
-        name: inputs.nameController.text,
-        phone: inputs.phoneController.text,
+      final authProvider = context.read<AuthProvider>();
+      final userRole = _role == 'qari' ? UserRole.qari : UserRole.student;
+      
+      final success = await authProvider.signUp(
         email: inputs.emailController.text,
         password: inputs.passwordController.text,
-        role: _role,
+        name: inputs.nameController.text,
+        role: userRole,
+        phone: inputs.phoneController.text.isNotEmpty ? inputs.phoneController.text : null,
       );
 
       if (!mounted) return;
-      if (_role.toLowerCase() == 'qari') {
-        context.go('/qari-dashboard');
-      } else {
-        context.go('/student-dashboard');
+
+      if (success) {
+        if (userRole == UserRole.qari) {
+          context.go('/qari-dashboard');
+        } else {
+          context.go('/student-dashboard');
+        }
       }
     } on Exception catch (e) {
       if (!mounted) return;
