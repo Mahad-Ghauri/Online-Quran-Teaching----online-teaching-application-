@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:qari_connect/providers/app_providers.dart';
 import 'package:qari_connect/views/interface/dashboards/student/pages/student_home_page.dart';
 import 'package:qari_connect/views/interface/dashboards/student/pages/student_qaris_page.dart';
 import 'package:qari_connect/views/interface/dashboards/student/pages/student_bookings_page.dart';
@@ -14,9 +16,24 @@ class StudentMainDashboard extends StatefulWidget {
   State<StudentMainDashboard> createState() => _StudentMainDashboardState();
 }
 
-class _StudentMainDashboardState extends State<StudentMainDashboard> {
+class _StudentMainDashboardState extends State<StudentMainDashboard>
+    with TickerProviderStateMixin {
   int _currentIndex = 0;
-  final PageController _pageController = PageController();
+  late PageController _pageController;
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+    _tabController = TabController(length: 5, vsync: this);
+    
+    // Initialize providers
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = context.read<AuthProvider>();
+      authProvider.initializeAuth();
+    });
+  }
 
   final List<Widget> _pages = [
     const StudentHomePage(),
@@ -57,6 +74,7 @@ class _StudentMainDashboardState extends State<StudentMainDashboard> {
   @override
   void dispose() {
     _pageController.dispose();
+    _tabController.dispose();
     super.dispose();
   }
 
