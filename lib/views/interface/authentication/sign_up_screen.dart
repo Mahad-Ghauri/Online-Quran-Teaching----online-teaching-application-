@@ -10,7 +10,8 @@ import 'package:qari_connect/controllers/input_controller.dart';
 import 'package:qari_connect/controllers/services/authentication/auth_services.dart';
 
 class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({super.key});
+  final String? initialRole; // expects 'qari' or 'student' (any case)
+  const SignUpScreen({super.key, this.initialRole});
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
@@ -18,7 +19,19 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final InputControllers inputs = InputControllers();
-  String _role = 'Student';
+  String _role = 'student';
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize role from navigation extra if provided
+    final incoming = widget.initialRole?.toLowerCase();
+    if (incoming == 'qari') {
+      _role = 'qari';
+    } else if (incoming == 'student') {
+      _role = 'student';
+    }
+  }
 
   @override
   void dispose() {
@@ -51,14 +64,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
         phone: inputs.phoneController.text,
         email: inputs.emailController.text,
         password: inputs.passwordController.text,
-        role: _role,
+        role: _role.toLowerCase(),
       );
 
       if (!mounted) return;
-      if (_role == 'Qari') {
-        context.go('/dashboard/qari');
+      if (_role.toLowerCase() == 'qari') {
+        context.go('/qari-dashboard');
       } else {
-        context.go('/dashboard/student');
+        context.go('/student-dashboard');
       }
     } on Exception catch (e) {
       if (!mounted) return;
@@ -178,7 +191,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 ),
                               ),
                               child: DropdownButtonFormField<String>(
-                                value: _role,
+                                value: _role.toLowerCase(),
                                 dropdownColor: const Color(0xFF2196F3).withOpacity(0.9),
                                 style: const TextStyle(
                                   color: Colors.white,
@@ -200,7 +213,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 ),
                                 items: [
                                   DropdownMenuItem(
-                                    value: 'Student',
+                                    value: 'student',
                                     child: Row(
                                       children: [
                                         Icon(
@@ -217,7 +230,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     ),
                                   ),
                                   DropdownMenuItem(
-                                    value: 'Qari',
+                                    value: 'qari',
                                     child: Row(
                                       children: [
                                         Icon(
@@ -235,7 +248,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   ),
                                 ],
                                 onChanged: (v) =>
-                                    setState(() => _role = v ?? 'Student'),
+                                    setState(() => _role = (v ?? 'student').toLowerCase()),
                                 icon: Icon(
                                   Icons.arrow_drop_down,
                                   color: Colors.white.withOpacity(0.7),

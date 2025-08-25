@@ -1,28 +1,63 @@
 import 'package:go_router/go_router.dart';
 import 'package:qari_connect/views/screens/splashscreen.dart';
+import 'package:qari_connect/views/interface/auth/auth_gate.dart';
+import 'package:qari_connect/views/interface/auth/auth_selection_screen.dart';
 import 'package:qari_connect/views/interface/authentication/sign_in_screen.dart';
 import 'package:qari_connect/views/interface/authentication/sign_up_screen.dart';
-import 'package:qari_connect/views/interface/dashboards/qari_dashboard.dart';
+import 'package:qari_connect/views/interface/dashboards/qari/qari_main_dashboard.dart';
 import 'package:qari_connect/views/interface/dashboards/student_dashboard.dart';
 
 final GoRouter appRouter = GoRouter(
+  initialLocation: '/',
   routes: <RouteBase>[
-    GoRoute(path: '/', builder: (context, state) => const SplashScreen()),
+    // Auth Gate - Main entry point
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const AuthGate(),
+    ),
+    
+    // Splash Screen
+    GoRoute(
+      path: '/splash',
+      builder: (context, state) => const SplashScreen(),
+    ),
+    
+    // Auth Selection Screen
+    GoRoute(
+      path: '/auth',
+      builder: (context, state) => const AuthSelectionScreen(),
+    ),
+    
+    // Authentication Screens
     GoRoute(
       path: '/sign-in',
       builder: (context, state) => const SignInScreen(),
     ),
     GoRoute(
       path: '/sign-up',
-      builder: (context, state) => const SignUpScreen(),
+      builder: (context, state) => SignUpScreen(
+        initialRole: (state.extra is Map) ? (state.extra as Map)['role'] as String? : null,
+      ),
+    ),
+    
+    // Dashboard Routes
+    GoRoute(
+      path: '/qari-dashboard',
+      builder: (context, state) => const QariMainDashboard(),
+    ),
+    GoRoute(
+      path: '/student-dashboard',
+      builder: (context, state) => const StudentDashboard(),
+    ),
+    
+    // Legacy routes for backward compatibility
+    GoRoute(
+      path: '/dashboard/qari',
+      redirect: (context, state) => '/qari-dashboard',
     ),
     GoRoute(
       path: '/dashboard/student',
-      builder: (context, state) => const StudentDashboard(),
-    ),
-    GoRoute(
-      path: '/dashboard/qari',
-      builder: (context, state) => const QariDashboard(),
+      redirect: (context, state) => '/student-dashboard',
     ),
   ],
 );

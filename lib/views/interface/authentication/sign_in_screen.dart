@@ -40,10 +40,11 @@ class _SignInScreenState extends State<SignInScreen> {
 
       if (!mounted) return;
 
-      if (role == 'Qari') {
-        context.go('/dashboard/qari');
+      final normalized = role?.toLowerCase();
+      if (normalized == 'qari') {
+        context.go('/qari-dashboard');
       } else {
-        context.go('/dashboard/student');
+        context.go('/student-dashboard');
       }
     } on Exception catch (e) {
       if (!mounted) return;
