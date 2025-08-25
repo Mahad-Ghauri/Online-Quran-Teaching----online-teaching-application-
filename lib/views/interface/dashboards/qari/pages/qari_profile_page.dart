@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:qari_connect/services/auth_service.dart';
+import '../../../../../providers/app_providers.dart';
+import '../../../../../models/core_models.dart';
 
 class QariProfilePage extends StatefulWidget {
   const QariProfilePage({super.key});
@@ -17,6 +20,7 @@ class _QariProfilePageState extends State<QariProfilePage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _pricingController = TextEditingController();
   
   @override
   void initState() {
@@ -29,14 +33,25 @@ class _QariProfilePageState extends State<QariProfilePage> {
     _nameController.dispose();
     _bioController.dispose();
     _phoneController.dispose();
+    _pricingController.dispose();
     super.dispose();
   }
 
   void _loadProfileData() {
-    // TODO: Load actual profile data
-    _nameController.text = "Ustadh Ahmed Al-Rashid";
-    _bioController.text = "Experienced Quran teacher with 10+ years of teaching experience. Specialized in Tajweed, Hifz, and Arabic language.";
-    _phoneController.text = "+27 12 345 6789";
+    // Real-time data loading is handled by providers
+    final authProvider = context.read<AuthProvider>();
+    final qariProvider = context.read<QariProvider>();
+    
+    if (authProvider.currentUser != null) {
+      // Initialize controllers with current data if available
+      final user = authProvider.currentUser!;
+      final profile = qariProvider.currentQariProfile;
+      
+      _nameController.text = user.name;
+      _phoneController.text = user.phone ?? '';
+      _bioController.text = profile?.bio ?? '';
+      _pricingController.text = profile?.pricing.toString() ?? '50.0';
+    }
   }
 
   @override
@@ -67,6 +82,7 @@ class _QariProfilePageState extends State<QariProfilePage> {
         ],
       ),
       body: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
@@ -92,6 +108,9 @@ class _QariProfilePageState extends State<QariProfilePage> {
             
             // Settings
             _buildSettings(),
+            
+            // Extra bottom padding to ensure scrollability
+            const SizedBox(height: 100),
           ],
         ),
       ),
@@ -291,6 +310,14 @@ class _QariProfilePageState extends State<QariProfilePage> {
               controller: _bioController,
               maxLines: 3,
             ),
+            const SizedBox(height: 12),
+            _buildInfoField(
+              'Pricing (R per session)',
+              _pricingController.text,
+              Icons.monetization_on,
+              controller: _pricingController,
+              keyboardType: TextInputType.number,
+            ),
           ],
         ),
       ),
@@ -304,6 +331,7 @@ class _QariProfilePageState extends State<QariProfilePage> {
     TextEditingController? controller,
     bool editable = true,
     int maxLines = 1,
+    TextInputType? keyboardType,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,6 +349,7 @@ class _QariProfilePageState extends State<QariProfilePage> {
             ? TextFormField(
                 controller: controller,
                 maxLines: maxLines,
+                keyboardType: keyboardType,
                 decoration: InputDecoration(
                   prefixIcon: Icon(icon),
                   border: const OutlineInputBorder(),
@@ -616,18 +645,62 @@ class _QariProfilePageState extends State<QariProfilePage> {
     _loadProfileData(); // Reset to original data
   }
 
-  void _saveProfile() {
-    // TODO: Save profile data
-    setState(() {
-      _isEditing = false;
-    });
+  void _saveProfile() async {
+    final authProvider = context.read<AuthProvider>();
+    final qariProvider = context.read<QariProvider>();
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Profile updated successfully'),
-        backgroundColor: Colors.green,
-      ),
-    );
+    if (authProvider.currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('User not found'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Create or update QariProfile
+      final pricing = double.tryParse(_pricingController.text.trim()) ?? 50.0;
+      final qariProfile = QariProfile(
+        qariId: authProvider.currentUser!.id,
+        bio: _bioController.text.trim(),
+        certificates: [], // TODO: Add certificate upload functionality
+        availableSlots: [], // TODO: Add slot management
+        pricing: pricing,
+        rating: 0.0, // Initial rating
+      );
+
+      // Save the QariProfile to Firebase
+      final success = await qariProvider.saveQariProfile(qariProfile);
+      
+      if (success) {
+        setState(() {
+          _isEditing = false;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profile updated successfully! You can now receive bookings.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update profile: ${qariProvider.error}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _changeProfileImage() {

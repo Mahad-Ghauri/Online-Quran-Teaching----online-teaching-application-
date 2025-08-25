@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import '../../../../../providers/app_providers.dart';
+import '../../../../../models/core_models.dart';
 
 class QariHomePage extends StatefulWidget {
   const QariHomePage({super.key});
@@ -11,8 +14,6 @@ class QariHomePage extends StatefulWidget {
 class _QariHomePageState extends State<QariHomePage> {
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -31,7 +32,10 @@ class _QariHomePageState extends State<QariHomePage> {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: _refreshData,
+        onRefresh: () async {
+          // Real-time data refreshes automatically, no manual refresh needed
+          await Future.delayed(const Duration(milliseconds: 500));
+        },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16),
@@ -42,21 +46,19 @@ class _QariHomePageState extends State<QariHomePage> {
               _buildWelcomeCard(),
               const SizedBox(height: 20),
               
-              // Quick Stats
+              // Statistics Cards
               _buildQuickStats(),
               const SizedBox(height: 20),
               
-              // Verification Status (if not verified)
-              if (!_isVerified) ...[
-                _buildVerificationAlert(),
-                const SizedBox(height: 20),
-              ],
+              // Verification Status
+              _buildVerificationAlert(),
+              const SizedBox(height: 20),
               
               // Quick Actions
               _buildQuickActions(),
               const SizedBox(height: 20),
               
-              // Upcoming Bookings
+              // Today's Schedule / Upcoming Bookings
               _buildUpcomingBookings(),
               const SizedBox(height: 20),
               
@@ -69,117 +71,141 @@ class _QariHomePageState extends State<QariHomePage> {
     );
   }
 
-  // Mock data - TODO: Replace with real data
-  bool get _isVerified => false; // This should come from user profile
-  String get _qariName => "Ustadh Ahmed"; // This should come from user profile
-
-  Future<void> _refreshData() async {
-    // TODO: Refresh dashboard data
-    await Future.delayed(const Duration(seconds: 1));
-  }
-
   Widget _buildWelcomeCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Theme.of(context).primaryColor,
-            Theme.of(context).primaryColor.withOpacity(0.8),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).primaryColor.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+    return Consumer2<AuthProvider, QariProvider>(
+      builder: (context, authProvider, qariProvider, child) {
+        final user = authProvider.currentUser;
+        final qariProfile = qariProvider.currentQariProfile;
+        
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Theme.of(context).primaryColor,
+                Theme.of(context).primaryColor.withOpacity(0.8),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context).primaryColor.withOpacity(0.3),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Assalamu Alaikum',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                  ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Welcome back,',
+                style: GoogleFonts.merriweather(
+                  color: Colors.white,
+                  fontSize: 16,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  _qariName,
-                  style: GoogleFonts.merriweather(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                user?.name ?? 'Qari',
+                style: GoogleFonts.merriweather(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(
+                    user?.isVerified == true 
+                        ? Icons.verified 
+                        : Icons.pending,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    user?.isVerified == true 
+                        ? 'Verified Qari' 
+                        : 'Verification Pending',
+                    style: GoogleFonts.lato(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+              if (qariProfile != null) ...[
                 const SizedBox(height: 8),
                 Text(
-                  'Ready to inspire and teach today?',
-                  style: GoogleFonts.poppins(
-                    color: Colors.white.withOpacity(0.9),
+                  'Rating: ${qariProfile.rating.toStringAsFixed(1)} ⭐',
+                  style: GoogleFonts.lato(
+                    color: Colors.white,
                     fontSize: 14,
                   ),
                 ),
               ],
-            ),
+            ],
           ),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.school,
-              color: Colors.white,
-              size: 32,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   Widget _buildQuickStats() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildStatCard(
-            'Today\'s Classes',
-            '3',
-            Icons.today,
-            Colors.blue,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildStatCard(
-            'This Week',
-            '12',
-            Icons.date_range,
-            Colors.green,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _buildStatCard(
-            'Total Students',
-            '45',
-            Icons.people,
-            Colors.orange,
-          ),
-        ),
-      ],
+    return Consumer<BookingProvider>(
+      builder: (context, bookingProvider, child) {
+        final allBookings = bookingProvider.userBookings;
+        final upcomingBookings = bookingProvider.upcomingBookings;
+        final today = DateTime.now();
+        
+        // Calculate today's bookings
+        final todayBookings = allBookings.where((booking) {
+          return booking.slot.date.day == today.day &&
+                 booking.slot.date.month == today.month &&
+                 booking.slot.date.year == today.year;
+        }).length;
+        
+        // Calculate total earnings (mock calculation)
+        final totalEarnings = allBookings
+            .where((b) => b.status == BookingStatus.completed)
+            .length * 50; // Assuming $50 per session
+        
+        return Row(
+          children: [
+            Expanded(
+              child: _buildStatCard(
+                'Today\'s Classes',
+                todayBookings.toString(),
+                Icons.today,
+                Colors.blue,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildStatCard(
+                'Upcoming',
+                upcomingBookings.length.toString(),
+                Icons.schedule,
+                Colors.orange,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildStatCard(
+                'This Month',
+                '\$${totalEarnings}',
+                Icons.monetization_on,
+                Colors.green,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -225,57 +251,64 @@ class _QariHomePageState extends State<QariHomePage> {
   }
 
   Widget _buildVerificationAlert() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.orange.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.orange.withOpacity(0.3),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.warning_amber_rounded,
-            color: Colors.orange[700],
-            size: 24,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Verification Pending',
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.orange[700],
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Complete your verification to start accepting bookings',
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    color: Colors.orange[600],
-                  ),
-                ),
-              ],
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        final user = authProvider.currentUser;
+        
+        // Only show alert if user is not verified
+        if (user?.isVerified == true) {
+          return const SizedBox.shrink();
+        }
+        
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.orange.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.orange.withOpacity(0.3),
+              width: 1,
             ),
           ),
-          TextButton(
-            onPressed: () {
-              // TODO: Navigate to verification page
-            },
-            child: Text(
-              'Complete',
-              style: TextStyle(color: Colors.orange[700]),
-            ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.orange[700],
+                size: 24,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Verification Pending',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.orange[700],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Your account is under review. You\'ll be able to receive bookings once verified.',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Colors.orange[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.orange[700],
+                size: 16,
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

@@ -22,12 +22,12 @@ class _StudentQarisPageState extends State<StudentQarisPage> {
   @override
   void initState() {
     super.initState();
-    _loadQaris();
+    _startRealTimeListening();
   }
 
-  Future<void> _loadQaris() async {
+  void _startRealTimeListening() {
     final qariProvider = context.read<QariProvider>();
-    await qariProvider.loadVerifiedQaris();
+    qariProvider.startListeningToVerifiedQaris();
   }
 
   @override
@@ -197,6 +197,13 @@ class _StudentQarisPageState extends State<StudentQarisPage> {
   }
 
   Widget _buildQarisList(QariProvider qariProvider) {
+    // Debug print
+    print('DEBUG: QariProvider state:');
+    print('  - isLoading: ${qariProvider.isLoading}');
+    print('  - error: ${qariProvider.error}');
+    print('  - verifiedQaris count: ${qariProvider.verifiedQaris.length}');
+    print('  - verifiedQaris: ${qariProvider.verifiedQaris.map((q) => q.qariId).toList()}');
+    
     if (qariProvider.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -231,7 +238,7 @@ class _StudentQarisPageState extends State<StudentQarisPage> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _loadQaris,
+              onPressed: () => _startRealTimeListening(),
               child: const Text('Retry'),
             ),
           ],
@@ -291,7 +298,7 @@ class _StudentQarisPageState extends State<StudentQarisPage> {
     }
 
     return RefreshIndicator(
-      onRefresh: _loadQaris,
+      onRefresh: () async => _startRealTimeListening(),
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: filteredQaris.length,

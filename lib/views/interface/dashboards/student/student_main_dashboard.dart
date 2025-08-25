@@ -31,7 +31,19 @@ class _StudentMainDashboardState extends State<StudentMainDashboard>
     // Initialize providers
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = context.read<AuthProvider>();
-      authProvider.initializeAuth();
+      final qariProvider = context.read<QariProvider>();
+      final bookingProvider = context.read<BookingProvider>();
+      
+      authProvider.initializeAuth().then((_) {
+        if (authProvider.currentUser != null) {
+          // Start real-time listeners
+          qariProvider.startListeningToVerifiedQaris();
+          bookingProvider.startListeningToUserBookings(
+            authProvider.currentUser!.id,
+            authProvider.currentUser!.role,
+          );
+        }
+      });
     });
   }
 

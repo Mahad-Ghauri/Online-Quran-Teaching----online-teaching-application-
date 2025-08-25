@@ -16,23 +16,23 @@ class _StudentHomePageState extends State<StudentHomePage> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _startRealTimeListening();
   }
 
-  Future<void> _loadData() async {
+  void _startRealTimeListening() {
     final authProvider = context.read<AuthProvider>();
     final bookingProvider = context.read<BookingProvider>();
     final qariProvider = context.read<QariProvider>();
 
     if (authProvider.currentUser != null) {
-      // Load user's upcoming bookings
-      await bookingProvider.loadUpcomingBookings(
+      // Start listening to user's bookings in real-time
+      bookingProvider.startListeningToUserBookings(
         authProvider.currentUser!.id,
         authProvider.currentUser!.role,
       );
       
-      // Load verified Qaris for recommendations
-      await qariProvider.loadVerifiedQaris();
+      // Start listening to verified Qaris in real-time
+      qariProvider.startListeningToVerifiedQaris();
     }
   }
 

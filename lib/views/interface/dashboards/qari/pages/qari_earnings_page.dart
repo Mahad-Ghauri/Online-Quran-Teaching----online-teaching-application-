@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import '../../../../../providers/app_providers.dart';
+import '../../../../../models/core_models.dart';
 
 class QariEarningsPage extends StatefulWidget {
   const QariEarningsPage({super.key});

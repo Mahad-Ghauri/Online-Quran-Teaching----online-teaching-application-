@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import '../../../../../providers/app_providers.dart';
+import '../../../../../models/core_models.dart';
 
 class QariSchedulePage extends StatefulWidget {
   const QariSchedulePage({super.key});
@@ -288,63 +291,184 @@ class _BookingsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Filter Row
-          Row(
+    return Consumer<BookingProvider>(
+      builder: (context, bookingProvider, child) {
+        final bookings = bookingProvider.userBookings;
+        final isLoading = bookingProvider.isLoading;
+        
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search bookings...',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
+              // Filter Row
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Search bookings...',
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              PopupMenuButton<String>(
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.withOpacity(0.3)),
-                    borderRadius: BorderRadius.circular(12),
+                  const SizedBox(width: 12),
+                  PopupMenuButton<String>(
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.withOpacity(0.3)),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.filter_list),
+                    ),
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(value: 'all', child: Text('All')),
+                      const PopupMenuItem(value: 'today', child: Text('Today')),
+                      const PopupMenuItem(value: 'week', child: Text('This Week')),
+                      const PopupMenuItem(value: 'month', child: Text('This Month')),
+                    ],
                   ),
-                  child: const Icon(Icons.filter_list),
-                ),
-                itemBuilder: (context) => [
-                  const PopupMenuItem(value: 'all', child: Text('All')),
-                  const PopupMenuItem(value: 'today', child: Text('Today')),
-                  const PopupMenuItem(value: 'week', child: Text('This Week')),
-                  const PopupMenuItem(value: 'month', child: Text('This Month')),
                 ],
+              ),
+              const SizedBox(height: 16),
+              
+              // Bookings List
+              Expanded(
+                child: isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : bookings.isEmpty
+                        ? _buildEmptyState()
+                        : ListView.builder(
+                            itemCount: bookings.length,
+                            itemBuilder: (context, index) {
+                              final booking = bookings[index];
+                              return _buildRealTimeBookingCard(booking);
+                            },
+                          ),
               ),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.calendar_today_outlined,
+            size: 64,
+            color: Colors.grey[400],
+          ),
           const SizedBox(height: 16),
-          
-          // Bookings List
-          Expanded(
-            child: ListView.builder(
-              itemCount: _mockBookings.length,
-              itemBuilder: (context, index) {
-                final booking = _mockBookings[index];
-                return _buildBookingCard(booking);
-              },
+          Text(
+            'No bookings yet',
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Your bookings will appear here',
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: Colors.grey[500],
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildRealTimeBookingCard(Booking booking) {
+    Color statusColor;
+    IconData statusIcon;
+    
+    switch (booking.status) {
+      case BookingStatus.confirmed:
+        statusColor = Colors.green;
+        statusIcon = Icons.check_circle;
+        break;
+      case BookingStatus.pending:
+        statusColor = Colors.orange;
+        statusIcon = Icons.schedule;
+        break;
+      case BookingStatus.cancelled:
+        statusColor = Colors.red;
+        statusIcon = Icons.cancel;
+        break;
+      case BookingStatus.completed:
+        statusColor = Colors.blue;
+        statusIcon = Icons.done_all;
+        break;
+    }
+    
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(statusIcon, color: statusColor, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  booking.status.name.toUpperCase(),
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: statusColor,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '${booking.slot.date.day}/${booking.slot.date.month}/${booking.slot.date.year}',
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Student ID: ${booking.studentId}',
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Time: ${_formatTime(booking.slot.startTime)} - ${_formatTime(booking.slot.endTime)}',
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatTime(DateTime time) {
+    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
   }
 
   Widget _buildBookingCard(Map<String, dynamic> booking) {

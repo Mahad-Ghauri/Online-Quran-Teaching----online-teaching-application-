@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:qari_connect/providers/app_providers.dart';
 import 'package:qari_connect/views/interface/dashboards/qari/pages/qari_home_page.dart';
 import 'package:qari_connect/views/interface/dashboards/qari/pages/qari_schedule_page.dart';
 import 'package:qari_connect/views/interface/dashboards/qari/pages/qari_live_page.dart';
@@ -16,6 +18,31 @@ class QariMainDashboard extends StatefulWidget {
 class _QariMainDashboardState extends State<QariMainDashboard> {
   int _currentIndex = 0;
   final PageController _pageController = PageController();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeRealTimeData();
+  }
+
+  void _initializeRealTimeData() {
+    final authProvider = context.read<AuthProvider>();
+    final bookingProvider = context.read<BookingProvider>();
+    final qariProvider = context.read<QariProvider>();
+
+    if (authProvider.currentUser != null) {
+      // Start listening to Qari's bookings in real-time
+      bookingProvider.startListeningToUserBookings(
+        authProvider.currentUser!.id,
+        authProvider.currentUser!.role,
+      );
+      
+      // Start listening to current Qari's profile in real-time
+      qariProvider.startListeningToCurrentQariProfile(
+        authProvider.currentUser!.id,
+      );
+    }
+  }
 
   final List<Widget> _pages = const [
     QariHomePage(),

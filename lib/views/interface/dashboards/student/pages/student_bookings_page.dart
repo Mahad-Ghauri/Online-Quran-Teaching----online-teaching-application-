@@ -19,7 +19,7 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    _loadBookings();
+    _startRealTimeListening();
   }
 
   @override
@@ -28,12 +28,12 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
     super.dispose();
   }
 
-  Future<void> _loadBookings() async {
+  void _startRealTimeListening() {
     final authProvider = context.read<AuthProvider>();
     final bookingProvider = context.read<BookingProvider>();
 
     if (authProvider.currentUser != null) {
-      await bookingProvider.loadUserBookings(
+      bookingProvider.startListeningToUserBookings(
         authProvider.currentUser!.id,
         authProvider.currentUser!.role,
       );
@@ -286,7 +286,7 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: _loadBookings,
+                  onPressed: () => _startRealTimeListening(),
                   child: const Text('Retry'),
                 ),
               ],
@@ -328,7 +328,7 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
         }
 
         return RefreshIndicator(
-          onRefresh: _loadBookings,
+          onRefresh: () async => _startRealTimeListening(),
           child: ListView.builder(
             padding: const EdgeInsets.all(16),
             itemCount: bookings.length,

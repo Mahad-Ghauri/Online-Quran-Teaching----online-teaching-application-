@@ -1,6 +1,7 @@
 // State management providers for QariConnect app
 // Uses Provider pattern for reactive state management
 
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../models/core_models.dart';
 import '../services/auth_service.dart';
@@ -172,13 +173,63 @@ class QariProvider extends ChangeNotifier {
   QariProfile? _currentQariProfile;
   bool _isLoading = false;
   String? _error;
+  
+  // Stream subscriptions for real-time updates
+  StreamSubscription<List<QariProfile>>? _verifiedQarisSubscription;
+  StreamSubscription<QariProfile?>? _currentQariProfileSubscription;
 
   List<QariProfile> get verifiedQaris => _verifiedQaris;
   QariProfile? get currentQariProfile => _currentQariProfile;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  /// Load all verified Qaris for students
+  /// Start listening to verified Qaris in real-time
+  void startListeningToVerifiedQaris() {
+    print('DEBUG: QariProvider - startListeningToVerifiedQaris called');
+    _setLoading(true);
+    _verifiedQarisSubscription?.cancel();
+    
+    _verifiedQarisSubscription = FirestoreService.listenToVerifiedQaris().listen(
+      (qaris) {
+        print('DEBUG: QariProvider - Received ${qaris.length} qaris from stream');
+        _verifiedQaris = qaris;
+        _clearError();
+        _setLoading(false);
+        notifyListeners();
+      },
+      onError: (error) {
+        print('DEBUG: QariProvider - Stream error: $error');
+        _setError('Failed to load Qaris: $error');
+        _setLoading(false);
+      },
+    );
+  }
+
+  /// Start listening to current Qari profile in real-time
+  void startListeningToCurrentQariProfile(String qariId) {
+    _currentQariProfileSubscription?.cancel();
+    
+    _currentQariProfileSubscription = FirestoreService.listenToQariProfile(qariId).listen(
+      (profile) {
+        _currentQariProfile = profile;
+        _clearError();
+        notifyListeners();
+      },
+      onError: (error) {
+        _setError('Failed to load Qari profile: $error');
+      },
+    );
+  }
+
+  /// Stop listening to real-time updates
+  void stopListening() {
+    _verifiedQarisSubscription?.cancel();
+    _currentQariProfileSubscription?.cancel();
+    _verifiedQarisSubscription = null;
+    _currentQariProfileSubscription = null;
+  }
+
+  /// Load all verified Qaris for students (fallback method)
   Future<void> loadVerifiedQaris() async {
     _setLoading(true);
     try {
@@ -191,7 +242,7 @@ class QariProvider extends ChangeNotifier {
     }
   }
 
-  /// Load current user's Qari profile
+  /// Load current user's Qari profile (fallback method)
   Future<void> loadCurrentQariProfile(String qariId) async {
     _setLoading(true);
     try {
@@ -202,6 +253,12 @@ class QariProvider extends ChangeNotifier {
     } finally {
       _setLoading(false);
     }
+  }
+
+  @override
+  void dispose() {
+    stopListening();
+    super.dispose();
   }
 
   /// Create or update Qari profile
@@ -300,11 +357,49 @@ class BookingProvider extends ChangeNotifier {
   List<Booking> _upcomingBookings = [];
   bool _isLoading = false;
   String? _error;
+  
+  // Stream subscriptions for real-time updates
+  StreamSubscription<List<Booking>>? _userBookingsSubscription;
 
   List<Booking> get userBookings => _userBookings;
   List<Booking> get upcomingBookings => _upcomingBookings;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  /// Start listening to user bookings in real-time
+  void startListeningToUserBookings(String userId, UserRole role) {
+    _setLoading(true);
+    _userBookingsSubscription?.cancel();
+    
+    _userBookingsSubscription = FirestoreService.listenToUserBookings(userId, role).listen(
+      (bookings) {
+        _userBookings = bookings;
+        _upcomingBookings = bookings.where((booking) {
+          return booking.slot.startTime.isAfter(DateTime.now()) && 
+                 booking.status == BookingStatus.confirmed;
+        }).toList();
+        _clearError();
+        _setLoading(false);
+        notifyListeners();
+      },
+      onError: (error) {
+        _setError('Failed to load bookings: $error');
+        _setLoading(false);
+      },
+    );
+  }
+
+  /// Stop listening to real-time updates
+  void stopListening() {
+    _userBookingsSubscription?.cancel();
+    _userBookingsSubscription = null;
+  }
+
+  @override
+  void dispose() {
+    stopListening();
+    super.dispose();
+  }
 
   /// Load bookings for current user
   Future<void> loadUserBookings(String userId, UserRole role) async {

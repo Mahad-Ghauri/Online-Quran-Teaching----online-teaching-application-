@@ -401,22 +401,41 @@ class FirestoreService {
 
   /// Listen to verified Qaris
   static Stream<List<QariProfile>> listenToVerifiedQaris() {
+    print('DEBUG: Starting listenToVerifiedQaris');
+    print('DEBUG: Querying collection: $_qariProfilesCollection');
+    
+    // First, let's also check what users exist
+    _users.get().then((snapshot) {
+      print('DEBUG: Found ${snapshot.docs.length} users total');
+      for (final doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        print('DEBUG: User ${doc.id}: role=${data['role']}, isVerified=${data['isVerified']}, name=${data['name'] ?? 'unnamed'}');
+      }
+    });
+    
     return _qariProfiles.snapshots().asyncMap((snapshot) async {
+      print('DEBUG: QariProfiles snapshot received - ${snapshot.docs.length} documents');
       final List<QariProfile> verifiedProfiles = [];
       
       for (final doc in snapshot.docs) {
+        print('DEBUG: Processing QariProfile document: ${doc.id}');
         final profile = QariProfile.fromFirestore(doc);
         
         // Check if the Qari is verified
         final userDoc = await _users.doc(profile.qariId).get();
         if (userDoc.exists) {
           final user = UserModel.fromFirestore(userDoc);
+          print('DEBUG: User ${user.name} - isVerified: ${user.isVerified}, role: ${user.role}');
           if (user.isVerified && user.role.isQari) {
             verifiedProfiles.add(profile);
+            print('DEBUG: Added verified Qari: ${user.name}');
           }
+        } else {
+          print('DEBUG: User document not found for qariId: ${profile.qariId}');
         }
       }
       
+      print('DEBUG: Returning ${verifiedProfiles.length} verified Qaris');
       return verifiedProfiles;
     });
   }

@@ -86,34 +86,35 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
                       child: SafeArea(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            const SizedBox(height: 40),
+                            const SizedBox(height: 20),
                             CircleAvatar(
-                              radius: 50,
+                              radius: 40,
                               backgroundColor: Colors.white.withOpacity(0.2),
                               child: CircleAvatar(
-                                radius: 45,
+                                radius: 35,
                                 backgroundColor: Colors.white,
                                 child: Text(
                                   authProvider.currentUser!.name[0].toUpperCase(),
                                   style: GoogleFonts.merriweather(
-                                    fontSize: 32,
+                                    fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                     color: const Color(0xFF3498DB),
                                   ),
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 15),
+                           const SizedBox(height: 8),
                             Text(
                               authProvider.currentUser!.name,
                               style: GoogleFonts.merriweather(
-                                fontSize: 24,
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
                             ),
-                            const SizedBox(height: 5),
+                            const SizedBox(height: 4),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                               decoration: BoxDecoration(
