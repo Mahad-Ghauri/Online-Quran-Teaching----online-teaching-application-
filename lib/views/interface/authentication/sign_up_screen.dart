@@ -2,9 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:qari_connect/components/my_form_field.dart';
-import 'package:qari_connect/components/primary_button.dart';
-import 'package:qari_connect/config/theme.dart';
+import 'package:qari_connect/components/auth_form.dart';
+import 'package:qari_connect/components/auth_header.dart';
+import 'package:qari_connect/components/gradient_background.dart';
+import 'package:qari_connect/components/glassmorphism_button.dart';
 import 'package:qari_connect/controllers/input_controller.dart';
 import 'package:qari_connect/controllers/services/authentication/auth_services.dart';
 
@@ -32,9 +33,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     if (inputs.passwordController.text !=
         inputs.confirmPasswordController.text) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Passwords do not match'),
+          backgroundColor: Colors.red.withOpacity(0.8),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
       return;
     }
 
@@ -56,9 +62,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
     } on Exception catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.red.withOpacity(0.8),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
     } finally {
       if (mounted) setState(() => inputs.loading = false);
     }
@@ -66,92 +77,214 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: AppTheme.lightTheme,
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Sign Up')),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Form(
-              key: inputs.formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 16),
-                  MyFormField(
-                    labelText: 'Full Name',
-                    hintText: 'John Doe',
-                    controller: inputs.nameController,
-                    validator: (v) =>
-                        (v == null || v.isEmpty) ? 'Name is required' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  MyFormField(
-                    labelText: 'Phone',
-                    hintText: '+1 555 123 4567',
-                    keyboardType: TextInputType.phone,
-                    controller: inputs.phoneController,
-                    validator: (v) =>
-                        (v == null || v.isEmpty) ? 'Phone is required' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  MyFormField(
-                    labelText: 'Email',
-                    hintText: 'you@example.com',
-                    keyboardType: TextInputType.emailAddress,
-                    controller: inputs.emailController,
-                    validator: (v) =>
-                        (v == null || v.isEmpty) ? 'Email is required' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  MyFormField(
-                    labelText: 'Password',
-                    hintText: 'Create a password',
-                    controller: inputs.passwordController,
-                    obscureText: true,
-                    validator: (v) =>
-                        (v == null || v.length < 6) ? 'Min 6 characters' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  MyFormField(
-                    labelText: 'Confirm Password',
-                    hintText: 'Re-enter your password',
-                    controller: inputs.confirmPasswordController,
-                    obscureText: true,
-                    validator: (v) =>
-                        (v == null || v.length < 6) ? 'Min 6 characters' : null,
-                  ),
-                  const SizedBox(height: 16),
-                  DropdownButtonFormField<String>(
-                    value: _role,
-                    decoration: const InputDecoration(
-                      labelText: 'Role',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'Student',
-                        child: Text('Student'),
-                      ),
-                      DropdownMenuItem(value: 'Qari', child: Text('Qari')),
-                    ],
-                    onChanged: (v) => setState(() => _role = v ?? 'Student'),
-                  ),
-                  const SizedBox(height: 24),
-                  PrimaryButton(
-                    label: 'Create Account',
-                    loading: inputs.loading,
-                    onPressed: _handleSignUp,
-                  ),
-                  const SizedBox(height: 12),
-                  TextButton(
-                    onPressed: () => context.go('/sign-in'),
-                    child: const Text('Already have an account? Sign In'),
-                  ),
-                ],
+    return Scaffold(
+      body: GradientBackground(
+        colors: [
+          const Color(0xFF2196F3),
+          const Color(0xFF21CBF3),
+          const Color(0xFF4CAF50),
+          const Color(0xFF2196F3),
+        ],
+        child: SafeArea(
+          child: Column(
+            children: [
+              const SizedBox(height: 40),
+              const AuthHeader(
+                title: 'Create Account',
+                subtitle: 'Join us on your learning journey',
+                logoPath: 'assets/icons/logo.png',
               ),
-            ),
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: AuthForm(
+                      formKey: inputs.formKey,
+                      children: [
+                        AuthFormField(
+                          labelText: 'Full Name',
+                          hintText: 'John Doe',
+                          controller: inputs.nameController,
+                          prefixIcon: Icons.person_outline,
+                          validator: (v) => (v == null || v.isEmpty)
+                              ? 'Name is required'
+                              : null,
+                        ),
+                        const SizedBox(height: 20),
+                        AuthFormField(
+                          labelText: 'Phone',
+                          hintText: '+1 555 123 4567',
+                          keyboardType: TextInputType.phone,
+                          controller: inputs.phoneController,
+                          prefixIcon: Icons.phone_outlined,
+                          validator: (v) => (v == null || v.isEmpty)
+                              ? 'Phone is required'
+                              : null,
+                        ),
+                        const SizedBox(height: 20),
+                        AuthFormField(
+                          labelText: 'Email',
+                          hintText: 'you@example.com',
+                          keyboardType: TextInputType.emailAddress,
+                          controller: inputs.emailController,
+                          prefixIcon: Icons.email_outlined,
+                          validator: (v) => (v == null || v.isEmpty)
+                              ? 'Email is required'
+                              : null,
+                        ),
+                        const SizedBox(height: 20),
+                        AuthFormField(
+                          labelText: 'Password',
+                          hintText: 'Create a password',
+                          controller: inputs.passwordController,
+                          obscureText: true,
+                          prefixIcon: Icons.lock_outline,
+                          validator: (v) => (v == null || v.length < 6)
+                              ? 'Min 6 characters'
+                              : null,
+                        ),
+                        const SizedBox(height: 20),
+                        AuthFormField(
+                          labelText: 'Confirm Password',
+                          hintText: 'Re-enter your password',
+                          controller: inputs.confirmPasswordController,
+                          obscureText: true,
+                          prefixIcon: Icons.lock_outline,
+                          validator: (v) => (v == null || v.length < 6)
+                              ? 'Min 6 characters'
+                              : null,
+                        ),
+                        const SizedBox(height: 20),
+                        // Glassmorphism Role Selector
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Role',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.2),
+                                  width: 1,
+                                ),
+                              ),
+                              child: DropdownButtonFormField<String>(
+                                value: _role,
+                                dropdownColor: const Color(0xFF2196F3).withOpacity(0.9),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                                decoration: InputDecoration(
+                                  prefixIcon: Icon(
+                                    Icons.school_outlined,
+                                    color: Colors.white.withOpacity(0.7),
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 16,
+                                  ),
+                                ),
+                                items: [
+                                  DropdownMenuItem(
+                                    value: 'Student',
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.school,
+                                          color: Colors.white.withOpacity(0.8),
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        const Text(
+                                          'Student',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'Qari',
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.person_4,
+                                          color: Colors.white.withOpacity(0.8),
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        const Text(
+                                          'Qari',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                                onChanged: (v) =>
+                                    setState(() => _role = v ?? 'Student'),
+                                icon: Icon(
+                                  Icons.arrow_drop_down,
+                                  color: Colors.white.withOpacity(0.7),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 32),
+                        GlassmorphismButton(
+                          label: 'Create Account',
+                          loading: inputs.loading,
+                          onPressed: _handleSignUp,
+                          icon: Icons.person_add,
+                        ),
+                        const SizedBox(height: 16),
+                        Center(
+                          child: TextButton(
+                            onPressed: () => context.go('/sign-in'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.white70,
+                              textStyle: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            child: RichText(
+                              text: const TextSpan(
+                                text: "Already have an account? ",
+                                style: TextStyle(color: Colors.white70),
+                                children: [
+                                  TextSpan(
+                                    text: "Sign In",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
