@@ -7,7 +7,7 @@ import 'package:qari_connect/components/auth_header.dart';
 import 'package:qari_connect/components/gradient_background.dart';
 import 'package:qari_connect/components/glassmorphism_button.dart';
 import 'package:qari_connect/controllers/input_controller.dart';
-import 'package:qari_connect/controllers/services/authentication/auth_services.dart';
+import 'package:qari_connect/services/auth_service.dart';
 
 class SignUpScreen extends StatefulWidget {
   final String? initialRole; // expects 'qari' or 'student' (any case)
@@ -64,7 +64,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         phone: inputs.phoneController.text,
         email: inputs.emailController.text,
         password: inputs.passwordController.text,
-        role: _role.toLowerCase(),
+        role: _role,
       );
 
       if (!mounted) return;

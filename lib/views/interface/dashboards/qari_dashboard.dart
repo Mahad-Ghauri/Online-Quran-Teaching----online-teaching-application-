@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:qari_connect/controllers/services/authentication/auth_services.dart';
+import 'package:qari_connect/services/auth_service.dart';
 
 class QariDashboard extends StatelessWidget {
   const QariDashboard({super.key});
@@ -14,7 +14,7 @@ class QariDashboard extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              await AuthService.instance.signOut();
+              await AuthService.signOut();
               if (context.mounted) {
                 context.go('/sign-in');
               }

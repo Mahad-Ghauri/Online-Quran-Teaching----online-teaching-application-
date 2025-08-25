@@ -1,0 +1,448 @@
+// QariConnect Firebase Data Models Example Usage
+// This file demonstrates how to use the core Firebase models and services
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/core_models.dart';
+import '../services/auth_service.dart';
+import '../services/firestore_service.dart';
+import '../providers/app_providers.dart';
+
+/// Example: Authentication Usage
+class AuthExample extends StatelessWidget {
+  const AuthExample({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        if (authProvider.isLoading) {
+          return const CircularProgressIndicator();
+        }
+
+        if (authProvider.isAuthenticated) {
+          final user = authProvider.currentUser!;
+          return Column(
+            children: [
+              Text('Welcome ${user.name}!'),
+              Text('Role: ${user.role.displayName}'),
+              Text('Verified: ${user.isVerified ? "Yes" : "No"}'),
+              if (user.role.isQari && !user.isVerified)
+                const Text('Awaiting verification from admin'),
+            ],
+          );
+        }
+
+        return ElevatedButton(
+          onPressed: () => _showSignUpDialog(context),
+          child: const Text('Sign Up'),
+        );
+      },
+    );
+  }
+
+  void _showSignUpDialog(BuildContext context) {
+    // Example sign up with new AuthProvider
+    final authProvider = context.read<AuthProvider>();
+    
+    authProvider.signUp(
+      email: 'test@example.com',
+      password: 'password123',
+      name: 'Test User',
+      role: UserRole.student,
+    );
+  }
+}
+
+/// Example: Qari Profile Management
+class QariProfileExample {
+  
+  /// Create a new Qari profile
+  static Future<void> createQariProfile(String qariId) async {
+    final profile = QariProfile(
+      qariId: qariId,
+      bio: 'Experienced Quran teacher with 10+ years of teaching.',
+      certificates: [], // URLs to certificate images
+      availableSlots: [
+        TimeSlot(
+          date: DateTime.now().add(const Duration(days: 1)),
+          startTime: DateTime.now().add(const Duration(days: 1, hours: 10)),
+          endTime: DateTime.now().add(const Duration(days: 1, hours: 11)),
+        ),
+      ],
+      pricing: 25.0, // Per session fee
+      rating: 0.0, // Initial rating
+    );
+
+    await FirestoreService.createQariProfile(profile);
+  }
+
+  /// Update Qari availability
+  static Future<void> updateAvailability(String qariId, List<TimeSlot> newSlots) async {
+    await FirestoreService.updateQariProfile(qariId, {
+      'availableSlots': newSlots.map((slot) => slot.toMap()).toList(),
+    });
+  }
+}
+
+/// Example: Booking System Usage
+class BookingExample extends StatelessWidget {
+  const BookingExample({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer2<AuthProvider, BookingProvider>(
+      builder: (context, authProvider, bookingProvider, child) {
+        if (!authProvider.isAuthenticated) {
+          return const Text('Please log in to view bookings');
+        }
+
+        return Column(
+          children: [
+            ElevatedButton(
+              onPressed: () => _loadBookings(context),
+              child: const Text('Load My Bookings'),
+            ),
+            if (bookingProvider.isLoading)
+              const CircularProgressIndicator(),
+            if (bookingProvider.userBookings.isNotEmpty)
+              Expanded(
+                child: ListView.builder(
+                  itemCount: bookingProvider.userBookings.length,
+                  itemBuilder: (context, index) {
+                    final booking = bookingProvider.userBookings[index];
+                    return ListTile(
+                      title: Text('Booking ${booking.id}'),
+                      subtitle: Text('Status: ${booking.status.displayName}'),
+                      trailing: Text('\$${booking.price.toStringAsFixed(2)}'),
+                    );
+                  },
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _loadBookings(BuildContext context) {
+    final authProvider = context.read<AuthProvider>();
+    final bookingProvider = context.read<BookingProvider>();
+    
+    if (authProvider.currentUser != null) {
+      bookingProvider.loadUserBookings(
+        authProvider.currentUser!.id,
+        authProvider.currentUser!.role,
+      );
+    }
+  }
+}
+
+/// Example: Create a Booking
+class BookingCreationExample {
+  
+  static Future<bool> createBooking({
+    required String studentId,
+    required String qariId,
+    required TimeSlot slot,
+    required double price,
+  }) async {
+    // Check if slot is still available
+    final isAvailable = await FirestoreService.isSlotAvailable(qariId, slot);
+    if (!isAvailable) {
+      return false;
+    }
+
+    final booking = Booking(
+      id: '', // Will be generated by Firestore
+      studentId: studentId,
+      qariId: qariId,
+      slot: slot,
+      status: BookingStatus.pending,
+      price: price,
+      createdAt: DateTime.now(),
+    );
+
+    try {
+      await FirestoreService.createBooking(booking);
+      return true;
+    } catch (e) {
+      print('Failed to create booking: $e');
+      return false;
+    }
+  }
+}
+
+/// Example: Review System
+class ReviewExample {
+  
+  /// Create a review after completed session
+  static Future<bool> createReview({
+    required String studentId,
+    required String qariId,
+    required int rating,
+    required String comment,
+  }) async {
+    final review = Review(
+      id: '', // Will be generated by Firestore
+      studentId: studentId,
+      qariId: qariId,
+      rating: rating.clamp(1, 5), // Ensure rating is between 1-5
+      comment: comment,
+      timestamp: DateTime.now(),
+    );
+
+    try {
+      await FirestoreService.createReview(review);
+      return true;
+    } catch (e) {
+      print('Failed to create review: $e');
+      return false;
+    }
+  }
+
+  /// Get reviews for a Qari with Provider
+  static Widget buildQariReviews(String qariId) {
+    return Consumer<ReviewProvider>(
+      builder: (context, reviewProvider, child) {
+        // Load reviews if not already loaded
+        if (reviewProvider.qariReviews.isEmpty) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            reviewProvider.loadQariReviews(qariId);
+          });
+        }
+
+        if (reviewProvider.isLoading) {
+          return const CircularProgressIndicator();
+        }
+
+        final reviews = reviewProvider.qariReviews;
+        final averageRating = reviewProvider.getAverageRating(qariId);
+
+        return Column(
+          children: [
+            Text('Average Rating: ${averageRating.toStringAsFixed(1)}'),
+            Expanded(
+              child: ListView.builder(
+                itemCount: reviews.length,
+                itemBuilder: (context, index) {
+                  final review = reviews[index];
+                  return ListTile(
+                    title: Text('${review.rating} stars'),
+                    subtitle: Text(review.comment),
+                    trailing: Text(_formatDate(review.timestamp)),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+}
+
+/// Example: Real-time Data Listening
+class RealTimeExample extends StatefulWidget {
+  const RealTimeExample({super.key});
+
+  @override
+  State<RealTimeExample> createState() => _RealTimeExampleState();
+}
+
+class _RealTimeExampleState extends State<RealTimeExample> {
+  
+  @override
+  Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
+    
+    if (!authProvider.isAuthenticated) {
+      return const Text('Please log in to see real-time updates');
+    }
+
+    final userId = authProvider.currentUser!.id;
+    final userRole = authProvider.currentUser!.role;
+
+    return StreamBuilder<List<Booking>>(
+      stream: FirestoreService.listenToUserBookings(userId, userRole),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        }
+
+        if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        }
+
+        final bookings = snapshot.data ?? [];
+        
+        return ListView.builder(
+          itemCount: bookings.length,
+          itemBuilder: (context, index) {
+            final booking = bookings[index];
+            return ListTile(
+              title: Text('Real-time Booking ${booking.id}'),
+              subtitle: Text('Status: ${booking.status.displayName}'),
+              leading: Icon(
+                booking.status.isActive 
+                  ? Icons.check_circle 
+                  : Icons.pending,
+                color: booking.status.isActive 
+                  ? Colors.green 
+                  : Colors.orange,
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+/// Example: Admin Operations
+class AdminExample {
+  
+  /// Verify a Qari (Admin only)
+  static Future<bool> verifyQari(String qariId) async {
+    try {
+      await FirestoreService.verifyQari(qariId);
+      return true;
+    } catch (e) {
+      print('Failed to verify Qari: $e');
+      return false;
+    }
+  }
+
+  /// Get unverified Qaris for admin review
+  static Future<List<UserModel>> getUnverifiedQaris() async {
+    return await FirestoreService.getUnverifiedQaris();
+  }
+
+  /// View admin logs
+  static Future<List<AdminLog>> getAdminActivity() async {
+    return await FirestoreService.getAdminLogs(limit: 100);
+  }
+}
+
+/// Example: Data Validation and Error Handling
+class ValidationExample {
+  
+  /// Validate time slot before booking
+  static bool isValidTimeSlot(TimeSlot slot) {
+    final now = DateTime.now();
+    
+    // Slot must be in the future
+    if (slot.startTime.isBefore(now)) {
+      return false;
+    }
+    
+    // Slot must be at least 30 minutes long
+    if (slot.duration.inMinutes < 30) {
+      return false;
+    }
+    
+    // Slot must not be longer than 3 hours
+    if (slot.duration.inHours > 3) {
+      return false;
+    }
+    
+    return true;
+  }
+
+  /// Validate email and password during signup
+  static String? validateSignUpData({
+    required String email,
+    required String password,
+    required String name,
+  }) {
+    if (name.trim().isEmpty) {
+      return 'Name is required';
+    }
+    
+    if (!AuthService.isValidEmail(email)) {
+      return 'Invalid email format';
+    }
+    
+    if (!AuthService.isValidPassword(password)) {
+      return 'Password must be at least 6 characters with letters and numbers';
+    }
+    
+    return null; // No errors
+  }
+}
+
+/// Example: Search and Filter Functionality
+class SearchExample extends StatelessWidget {
+  const SearchExample({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<QariProvider>(
+      builder: (context, qariProvider, child) {
+        return Column(
+          children: [
+            // Search bar
+            TextField(
+              decoration: const InputDecoration(
+                hintText: 'Search Qaris...',
+                prefixIcon: Icon(Icons.search),
+              ),
+              onChanged: (query) {
+                // Trigger search
+                final results = qariProvider.searchQaris(query);
+                // Update UI with results
+              },
+            ),
+            
+            // Filter options
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    // Filter by high rating
+                    final highRatedQaris = qariProvider.filterByRating(4.0);
+                    // Update UI with filtered results
+                  },
+                  child: const Text('4+ Stars'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    // Sort by price
+                    final sortedQaris = qariProvider.sortQaris(QariSortOption.priceLowToHigh);
+                    // Update UI with sorted results
+                  },
+                  child: const Text('Price: Low to High'),
+                ),
+              ],
+            ),
+            
+            // Results list
+            Expanded(
+              child: ListView.builder(
+                itemCount: qariProvider.verifiedQaris.length,
+                itemBuilder: (context, index) {
+                  final qari = qariProvider.verifiedQaris[index];
+                  return ListTile(
+                    title: Text('Qari ${qari.qariId}'),
+                    subtitle: Text(qari.bio),
+                    trailing: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text('${qari.rating.toStringAsFixed(1)} ⭐'),
+                        Text('\$${qari.pricing.toStringAsFixed(0)}/session'),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}

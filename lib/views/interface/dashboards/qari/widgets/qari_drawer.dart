@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import 'package:qari_connect/controllers/services/authentication/auth_services.dart';
+import 'package:qari_connect/services/auth_service.dart';
 
 class QariDrawer extends StatelessWidget {
   const QariDrawer({super.key});
@@ -408,7 +408,7 @@ class QariDrawer extends StatelessWidget {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              await AuthService.instance.signOut();
+              await AuthService.signOut();
               if (context.mounted) {
                 context.go('/sign-in');
               }

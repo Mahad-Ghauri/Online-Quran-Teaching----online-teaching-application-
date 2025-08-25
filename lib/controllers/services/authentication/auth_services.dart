@@ -41,6 +41,7 @@ class AuthService {
       'phone': phone,
       'email': email.trim().toLowerCase(),
       'role': role.toLowerCase(), // normalized to lowercase
+      'isVerified': false, // Always include isVerified field
       'createdAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
 

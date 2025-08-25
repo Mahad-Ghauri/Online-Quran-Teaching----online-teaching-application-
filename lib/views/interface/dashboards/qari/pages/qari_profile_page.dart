@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
-import 'package:qari_connect/controllers/services/authentication/auth_services.dart';
+import 'package:qari_connect/services/auth_service.dart';
 
 class QariProfilePage extends StatefulWidget {
   const QariProfilePage({super.key});
@@ -662,7 +662,7 @@ class _QariProfilePageState extends State<QariProfilePage> {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              await AuthService.instance.signOut();
+              await AuthService.signOut();
               if (mounted) {
                 context.go('/sign-in');
               }

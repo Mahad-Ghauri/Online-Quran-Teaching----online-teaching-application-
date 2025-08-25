@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:qari_connect/controllers/services/authentication/auth_services.dart';
 import 'package:qari_connect/views/interface/dashboards/qari/pages/qari_home_page.dart';
 import 'package:qari_connect/views/interface/dashboards/qari/pages/qari_schedule_page.dart';
 import 'package:qari_connect/views/interface/dashboards/qari/pages/qari_live_page.dart';

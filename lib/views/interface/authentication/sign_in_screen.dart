@@ -8,7 +8,7 @@ import 'package:qari_connect/components/auth_header.dart';
 import 'package:qari_connect/components/glassmorphism_button.dart';
 import 'package:qari_connect/components/gradient_background.dart';
 import 'package:qari_connect/controllers/input_controller.dart';
-import 'package:qari_connect/controllers/services/authentication/auth_services.dart';
+import 'package:qari_connect/services/auth_service.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
