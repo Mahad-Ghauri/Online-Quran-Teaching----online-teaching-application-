@@ -1,4 +1,6 @@
 // Enhanced Sign In Screen
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qari_connect/components/auth_form.dart';
@@ -80,7 +82,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       children: [
                         AuthFormField(
                           labelText: 'Email',
-                          hintText: 'you@example.com',
+                          hintText: 'Enter your email',
                           keyboardType: TextInputType.emailAddress,
                           controller: inputs.emailController,
                           prefixIcon: Icons.email_outlined,

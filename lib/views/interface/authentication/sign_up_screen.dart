@@ -103,7 +103,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       children: [
                         AuthFormField(
                           labelText: 'Full Name',
-                          hintText: 'John Doe',
+                          hintText: 'Enter your full name',
                           controller: inputs.nameController,
                           prefixIcon: Icons.person_outline,
                           validator: (v) => (v == null || v.isEmpty)
@@ -113,7 +113,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         const SizedBox(height: 20),
                         AuthFormField(
                           labelText: 'Phone',
-                          hintText: '+1 555 123 4567',
+                          hintText: '+92xxxxxxxxxx',
                           keyboardType: TextInputType.phone,
                           controller: inputs.phoneController,
                           prefixIcon: Icons.phone_outlined,
@@ -124,7 +124,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         const SizedBox(height: 20),
                         AuthFormField(
                           labelText: 'Email',
-                          hintText: 'you@example.com',
+                          hintText: 'Enter your email',
                           keyboardType: TextInputType.emailAddress,
                           controller: inputs.emailController,
                           prefixIcon: Icons.email_outlined,
