@@ -1,5 +1,5 @@
 import 'package:go_router/go_router.dart';
-import 'package:qari_connect/screens/splashscreen.dart';
+import 'package:qari_connect/views/screens/splashscreen.dart';
 import 'package:qari_connect/views/interface/authentication/sign_in_screen.dart';
 import 'package:qari_connect/views/interface/authentication/sign_up_screen.dart';
 import 'package:qari_connect/views/interface/dashboards/qari_dashboard.dart';
