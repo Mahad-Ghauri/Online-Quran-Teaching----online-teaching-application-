@@ -3,8 +3,8 @@
 This plan operationalizes the full flow (student booking, Qari verification, payments with commission, and in-app admin panel) with two dashboards (Student, Qari) and separate signup pages.
 
 ## 0) Key Decisions (confirm before proceeding)
-- [ ] **Backend platform**: Firebase (Auth + Firestore + Storage + Functions) OR Supabase (Auth + Postgres + Storage + Edge Functions)
-- [ ] **State management**: Riverpod / Bloc / Provider
+- [ ] **Backend platform**: Firebase (Auth + Firestore + Storage + Functions) 
+- [ ] **State management**: Provider
 - [ ] **Navigation**: go_router / Navigator 2.0
 - [ ] **Live audio**: WebRTC / Jitsi SDK / Agora (free tier)
 - [ ] **Payments**: PayFast Split Payments API vs single merchant + manual payouts
@@ -16,7 +16,7 @@ This plan operationalizes the full flow (student booking, Qari verification, pay
   - [ ] firebase_core, firebase_auth, cloud_firestore, firebase_storage
   - [ ] cloud_functions (for server-validated tasks)
   - [ ] go_router or auto_route
-  - [ ] state management (Riverpod/Bloc)
+  - [ ] state management (provider)
   - [ ] file_picker / image_picker for document uploads
   - [ ] http/dio for PayFast integration
   - [ ] webrtc/jitsi_meet_wrapper/agora_rtc_engine (one)

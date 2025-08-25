@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "291911333859",
+    "project_id": "qariconnect-9b95c",
+    "storage_bucket": "qariconnect-9b95c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:291911333859:android:b399e1922e51ccf9c012d6",
+        "android_client_info": {
+          "package_name": "com.example.qari_connect"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUYa6d03TC97rJHJAEeL8RvTNn7O8PFnM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
