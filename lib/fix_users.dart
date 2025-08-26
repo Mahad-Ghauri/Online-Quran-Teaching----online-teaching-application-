@@ -1,6 +1,8 @@
 // Quick fix for existing users missing isVerified field
 // Run this to update all existing users in Firestore
 
+// ignore_for_file: avoid_print
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class QuickUserFix {

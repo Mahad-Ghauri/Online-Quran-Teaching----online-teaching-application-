@@ -1,8 +1,9 @@
 // State management providers for QariConnect app
 // Uses Provider pattern for reactive state management
 
+// ignore_for_file: avoid_print
+
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/core_models.dart';

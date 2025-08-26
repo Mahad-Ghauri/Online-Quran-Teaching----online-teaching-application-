@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -187,7 +189,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
             TextButton(
               onPressed: () {
                 // Navigate to bookings page
-                DefaultTabController.of(context)?.animateTo(2);
+                DefaultTabController.of(context).animateTo(2);
               },
               child: Text(
                 'View All',
@@ -354,7 +356,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 subtitle: 'Browse verified teachers',
                 color: const Color(0xFF3498DB),
                 onTap: () {
-                  DefaultTabController.of(context)?.animateTo(1);
+                  DefaultTabController.of(context).animateTo(1);
                 },
               ),
             ),
@@ -366,7 +368,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 subtitle: 'Connect to sessions',
                 color: const Color(0xFF9B59B6),
                 onTap: () {
-                  DefaultTabController.of(context)?.animateTo(3);
+                  DefaultTabController.of(context).animateTo(3);
                 },
               ),
             ),
@@ -440,7 +442,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
             ),
             TextButton(
               onPressed: () {
-                DefaultTabController.of(context)?.animateTo(1);
+                DefaultTabController.of(context).animateTo(1);
               },
               child: Text(
                 'View All',

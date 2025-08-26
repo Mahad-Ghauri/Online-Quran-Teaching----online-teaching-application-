@@ -1,6 +1,8 @@
 // Firebase Firestore service for QariConnect app
 // Handles all CRUD operations for core models
 
+// ignore_for_file: avoid_print
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/core_models.dart';
