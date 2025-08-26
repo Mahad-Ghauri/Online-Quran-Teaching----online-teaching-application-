@@ -67,7 +67,7 @@ class _QariBookingDialogState extends State<QariBookingDialog> {
                         style: GoogleFonts.merriweather(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey[800],
+                          color: Colors.white70,
                         ),
                       ),
                       Text(
@@ -95,7 +95,7 @@ class _QariBookingDialogState extends State<QariBookingDialog> {
               style: GoogleFonts.poppins(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey[800],
+                color: Colors.white70,
               ),
             ),
             const SizedBox(height: 12),
@@ -123,7 +123,7 @@ class _QariBookingDialogState extends State<QariBookingDialog> {
                           : 'Select a date',
                       style: GoogleFonts.poppins(
                         fontSize: 14,
-                        color: _selectedDate != null ? Colors.grey[800] : Colors.grey[500],
+                        color: _selectedDate != null ? Colors.white60 : Colors.white70,
                       ),
                     ),
                     const Spacer(),
@@ -144,7 +144,7 @@ class _QariBookingDialogState extends State<QariBookingDialog> {
               style: GoogleFonts.poppins(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey[800],
+                color: Colors.white70,
               ),
             ),
             const SizedBox(height: 12),
@@ -234,7 +234,7 @@ class _QariBookingDialogState extends State<QariBookingDialog> {
                     style: GoogleFonts.poppins(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey[800],
+                      color: Colors.white70,
                     ),
                   ),
                   Text(
@@ -268,7 +268,7 @@ class _QariBookingDialogState extends State<QariBookingDialog> {
                       'Cancel',
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w600,
-                        color: Colors.grey[600],
+                        color: Colors.white70,
                       ),
                     ),
                   ),

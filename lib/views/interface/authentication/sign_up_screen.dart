@@ -101,10 +101,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return Scaffold(
       body: GradientBackground(
         colors: [
-          const Color(0xFF2196F3),
-          const Color(0xFF21CBF3),
-          const Color(0xFF4CAF50),
-          const Color(0xFF2196F3),
+          const Color.fromARGB(255, 40, 146, 102),
+          const Color.fromARGB(255, 65, 179, 90),
+          const Color.fromARGB(255, 48, 116, 50),
+          const Color.fromARGB(255, 23, 85, 41),
         ],
         child: SafeArea(
           child: Column(

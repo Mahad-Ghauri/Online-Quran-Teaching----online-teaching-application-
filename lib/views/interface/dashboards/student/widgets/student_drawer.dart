@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:qari_connect/services/auth_service.dart';
 import 'package:qari_connect/providers/app_providers.dart';
 
@@ -171,7 +172,7 @@ class StudentDrawer extends StatelessWidget {
               // Name
               Flexible(
                 child: Text(
-                  'Student Ahmad Ali', // TODO: Get from user profile
+                  context.watch<AuthProvider>().currentUser?.name ?? 'Student',
                   style: GoogleFonts.merriweather(
                     color: Colors.white,
                     fontSize: 16,
@@ -253,12 +254,12 @@ class StudentDrawer extends StatelessWidget {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: (iconColor ?? Theme.of(context).primaryColor).withOpacity(0.1),
+          color: (iconColor ?? Colors.white).withOpacity(0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(
           icon,
-          color: iconColor ?? Theme.of(context).primaryColor,
+          color: iconColor ?? Colors.white,
           size: 20,
         ),
       ),
