@@ -444,19 +444,26 @@ class FirestoreService {
       
       for (final doc in snapshot.docs) {
         print('DEBUG: Processing QariProfile document: ${doc.id}');
-        final profile = QariProfile.fromFirestore(doc);
-        
-        // Check if the Qari is verified
-        final userDoc = await _users.doc(profile.qariId).get();
-        if (userDoc.exists) {
-          final user = UserModel.fromFirestore(userDoc);
-          print('DEBUG: User ${user.name} - isVerified: ${user.isVerified}, role: ${user.role}');
-          if (user.isVerified && user.role.isQari) {
-            verifiedProfiles.add(profile);
-            print('DEBUG: Added verified Qari: ${user.name}');
+        try {
+          final profile = QariProfile.fromFirestore(doc);
+          print('DEBUG: Created QariProfile for: ${profile.qariId}');
+          
+          // Check if the Qari is verified
+          final userDoc = await _users.doc(profile.qariId).get();
+          if (userDoc.exists) {
+            final user = UserModel.fromFirestore(userDoc);
+            print('DEBUG: User ${user.name} - isVerified: ${user.isVerified}, role: ${user.role}');
+            if (user.isVerified && user.role.isQari) {
+              verifiedProfiles.add(profile);
+              print('DEBUG: Added verified Qari: ${user.name} with qariId: ${profile.qariId}');
+            } else {
+              print('DEBUG: Qari ${user.name} not added - isVerified: ${user.isVerified}, isQari: ${user.role.isQari}');
+            }
+          } else {
+            print('DEBUG: User document not found for qariId: ${profile.qariId}');
           }
-        } else {
-          print('DEBUG: User document not found for qariId: ${profile.qariId}');
+        } catch (e) {
+          print('DEBUG: Error processing QariProfile ${doc.id}: $e');
         }
       }
       

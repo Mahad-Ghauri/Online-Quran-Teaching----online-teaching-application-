@@ -28,8 +28,9 @@ class _StudentQarisPageState extends State<StudentQarisPage> {
   }
 
   void _startRealTimeListening() {
-    final qariProvider = context.read<QariProvider>();
-    qariProvider.startListeningToVerifiedQaris();
+    // Note: startListeningToVerifiedQaris is called from main dashboard
+    // final qariProvider = context.read<QariProvider>();
+    // qariProvider.startListeningToVerifiedQaris();
   }
 
   @override

@@ -211,24 +211,37 @@ class QariProvider extends ChangeNotifier {
   String? get error => _error;
 
   /// Start listening to verified Qaris in real-time
-  void startListeningToVerifiedQaris() {
-    if (_isListeningToVerifiedQaris) {
+  void startListeningToVerifiedQaris({bool forceRestart = false}) {
+    if (_isListeningToVerifiedQaris && !forceRestart) {
       print('DEBUG: QariProvider - Already listening to verified Qaris, skipping');
+      print('DEBUG: QariProvider state:');
+      print('  - isLoading: $_isLoading');
+      print('  - error: $_error');
+      print('  - verifiedQaris count: ${_verifiedQaris.length}');
+      print('  - verifiedQaris: ${_verifiedQaris.map((q) => q.qariId).toList()}');
       return;
     }
     
-    print('DEBUG: QariProvider - startListeningToVerifiedQaris called');
-    _setLoading(true);
-    _verifiedQarisSubscription?.cancel();
+    print('DEBUG: QariProvider - startListeningToVerifiedQaris called (forceRestart: $forceRestart)');
     _isListeningToVerifiedQaris = true;
+    _verifiedQarisSubscription?.cancel();
+    
+    // Don't set loading immediately to avoid setState during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _setLoading(true);
+    });
     
     _verifiedQarisSubscription = FirestoreService.listenToVerifiedQaris().listen(
       (qaris) {
         print('DEBUG: QariProvider - Received ${qaris.length} qaris from stream');
+        print('DEBUG: QariProvider - Before update - verifiedQaris count: ${_verifiedQaris.length}');
         _verifiedQaris = qaris;
+        print('DEBUG: QariProvider - After update - verifiedQaris count: ${_verifiedQaris.length}');
+        if (qaris.isNotEmpty) {
+          print('DEBUG: QariProvider - Qari names: ${qaris.map((q) => q.qariId).toList()}');
+        }
         _clearError();
         _setLoading(false);
-        notifyListeners();
       },
       onError: (error) {
         print('DEBUG: QariProvider - Stream error: $error');
@@ -267,11 +280,13 @@ class QariProvider extends ChangeNotifier {
 
   /// Clear all data (called on logout)
   void clear() {
+    print('DEBUG: QariProvider - clear() called');
     stopListening();
     _verifiedQaris = [];
     _currentQariProfile = null;
     _isLoading = false;
     _error = null;
+    _isListeningToVerifiedQaris = false; // Reset the listening flag
     notifyListeners();
   }
 
@@ -382,6 +397,7 @@ class QariProvider extends ChangeNotifier {
   }
 
   void _setLoading(bool loading) {
+    print('DEBUG: QariProvider - _setLoading($loading) called, verifiedQaris count: ${_verifiedQaris.length}');
     _isLoading = loading;
     notifyListeners();
   }

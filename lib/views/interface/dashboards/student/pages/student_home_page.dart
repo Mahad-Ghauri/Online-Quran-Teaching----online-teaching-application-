@@ -24,7 +24,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
   void _startRealTimeListening() {
     final authProvider = context.read<AuthProvider>();
     final bookingProvider = context.read<BookingProvider>();
-    final qariProvider = context.read<QariProvider>();
+    // final qariProvider = context.read<QariProvider>();
 
     if (authProvider.currentUser != null) {
       // Start listening to user's bookings in real-time
@@ -33,8 +33,8 @@ class _StudentHomePageState extends State<StudentHomePage> {
         authProvider.currentUser!.role,
       );
 
-      // Start listening to verified Qaris in real-time
-      qariProvider.startListeningToVerifiedQaris();
+      // Note: startListeningToVerifiedQaris is called from main dashboard
+      // qariProvider.startListeningToVerifiedQaris();
     }
   }
 

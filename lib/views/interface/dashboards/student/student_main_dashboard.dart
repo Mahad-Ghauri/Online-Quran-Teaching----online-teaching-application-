@@ -38,8 +38,8 @@ class _StudentMainDashboardState extends State<StudentMainDashboard>
 
       authProvider.initializeAuth().then((_) {
         if (authProvider.currentUser != null) {
-          // Start real-time listeners
-          qariProvider.startListeningToVerifiedQaris();
+          // Start real-time listeners with force restart after login
+          qariProvider.startListeningToVerifiedQaris(forceRestart: true);
           bookingProvider.startListeningToUserBookings(
             authProvider.currentUser!.id,
             authProvider.currentUser!.role,

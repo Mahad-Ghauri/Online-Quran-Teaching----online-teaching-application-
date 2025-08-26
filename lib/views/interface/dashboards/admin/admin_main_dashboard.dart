@@ -43,8 +43,8 @@ class _AdminMainDashboardState extends State<AdminMainDashboard> {
       final qariProvider = context.read<QariProvider>();
       // final bookingProvider = context.read<BookingProvider>();
       
-      // Start listening to all data for admin oversight
-      qariProvider.startListeningToVerifiedQaris();
+      // Start listening to all data for admin oversight with force restart
+      qariProvider.startListeningToVerifiedQaris(forceRestart: true);
       // Note: We'll add startListeningToAllBookings method to BookingProvider
       
       if (mounted) {
