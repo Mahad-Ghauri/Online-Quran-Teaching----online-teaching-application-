@@ -21,12 +21,13 @@ class _QariHomePageState extends State<QariHomePage> {
         title: Text(
           'Dashboard',
           style: GoogleFonts.merriweather(
+            color: Colors.white,
             fontWeight: FontWeight.w600,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined),
+            icon: const Icon(Icons.notifications_outlined, color: Colors.white),
             onPressed: () {
               // TODO: Navigate to notifications
             },
@@ -47,23 +48,23 @@ class _QariHomePageState extends State<QariHomePage> {
               // Welcome Card
               _buildWelcomeCard(),
               const SizedBox(height: 20),
-              
+
               // Statistics Cards
               _buildQuickStats(),
               const SizedBox(height: 20),
-              
+
               // Verification Status
               _buildVerificationAlert(),
               const SizedBox(height: 20),
-              
+
               // Quick Actions
               _buildQuickActions(),
               const SizedBox(height: 20),
-              
+
               // Today's Schedule / Upcoming Bookings
               _buildUpcomingBookings(),
               const SizedBox(height: 20),
-              
+
               // Recent Activity
               _buildRecentActivity(),
             ],
@@ -78,7 +79,7 @@ class _QariHomePageState extends State<QariHomePage> {
       builder: (context, authProvider, qariProvider, child) {
         final user = authProvider.currentUser;
         final qariProfile = qariProvider.currentQariProfile;
-        
+
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -122,16 +123,14 @@ class _QariHomePageState extends State<QariHomePage> {
               Row(
                 children: [
                   Icon(
-                    user?.isVerified == true 
-                        ? Icons.verified 
-                        : Icons.pending,
+                    user?.isVerified == true ? Icons.verified : Icons.pending,
                     color: Colors.white,
                     size: 18,
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    user?.isVerified == true 
-                        ? 'Verified Qari' 
+                    user?.isVerified == true
+                        ? 'Verified Qari'
                         : 'Verification Pending',
                     style: GoogleFonts.lato(
                       color: Colors.white,
@@ -145,10 +144,7 @@ class _QariHomePageState extends State<QariHomePage> {
                 const SizedBox(height: 8),
                 Text(
                   'Rating: ${qariProfile.rating.toStringAsFixed(1)} ⭐',
-                  style: GoogleFonts.lato(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
+                  style: GoogleFonts.lato(color: Colors.white, fontSize: 14),
                 ),
               ],
             ],
@@ -164,19 +160,21 @@ class _QariHomePageState extends State<QariHomePage> {
         final allBookings = bookingProvider.userBookings;
         final upcomingBookings = bookingProvider.upcomingBookings;
         final today = DateTime.now();
-        
+
         // Calculate today's bookings
         final todayBookings = allBookings.where((booking) {
           return booking.slot.date.day == today.day &&
-                 booking.slot.date.month == today.month &&
-                 booking.slot.date.year == today.year;
+              booking.slot.date.month == today.month &&
+              booking.slot.date.year == today.year;
         }).length;
-        
+
         // Calculate total earnings (mock calculation)
-        final totalEarnings = allBookings
-            .where((b) => b.status == BookingStatus.completed)
-            .length * 50; // Assuming $50 per session
-        
+        final totalEarnings =
+            allBookings
+                .where((b) => b.status == BookingStatus.completed)
+                .length *
+            50; // Assuming $50 per session
+
         return Row(
           children: [
             Expanded(
@@ -211,24 +209,22 @@ class _QariHomePageState extends State<QariHomePage> {
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withOpacity(0.2),
-          width: 1,
-        ),
+        border: Border.all(color: color.withOpacity(0.2), width: 1),
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            color: color,
-            size: 24,
-          ),
+          Icon(icon, color: color, size: 24),
           const SizedBox(height: 8),
           Text(
             value,
@@ -241,10 +237,7 @@ class _QariHomePageState extends State<QariHomePage> {
           const SizedBox(height: 4),
           Text(
             title,
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              color: Colors.grey[600],
-            ),
+            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
             textAlign: TextAlign.center,
           ),
         ],
@@ -256,21 +249,18 @@ class _QariHomePageState extends State<QariHomePage> {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
         final user = authProvider.currentUser;
-        
+
         // Only show alert if user is not verified
         if (user?.isVerified == true) {
           return const SizedBox.shrink();
         }
-        
+
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.orange.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.orange.withOpacity(0.3),
-              width: 1,
-            ),
+            border: Border.all(color: Colors.orange.withOpacity(0.3), width: 1),
           ),
           child: Row(
             children: [
@@ -371,19 +361,12 @@ class _QariHomePageState extends State<QariHomePage> {
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: color.withOpacity(0.2),
-            width: 1,
-          ),
+          border: Border.all(color: color.withOpacity(0.2), width: 1),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              icon,
-              color: color,
-              size: 24,
-            ),
+            Icon(icon, color: color, size: 24),
             const SizedBox(height: 12),
             Text(
               title,
@@ -395,10 +378,7 @@ class _QariHomePageState extends State<QariHomePage> {
             const SizedBox(height: 4),
             Text(
               subtitle,
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
             ),
           ],
         ),
@@ -410,7 +390,7 @@ class _QariHomePageState extends State<QariHomePage> {
     return Consumer<BookingProvider>(
       builder: (context, bookingProvider, child) {
         final upcomingBookings = bookingProvider.upcomingBookings;
-        
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -420,6 +400,7 @@ class _QariHomePageState extends State<QariHomePage> {
                 Text(
                   'Upcoming Classes',
                   style: GoogleFonts.merriweather(
+                    color: Colors.white,
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                   ),
@@ -433,7 +414,7 @@ class _QariHomePageState extends State<QariHomePage> {
               ],
             ),
             const SizedBox(height: 12),
-            
+
             if (upcomingBookings.isEmpty)
               Container(
                 padding: const EdgeInsets.all(20),
@@ -447,11 +428,7 @@ class _QariHomePageState extends State<QariHomePage> {
                 ),
                 child: Column(
                   children: [
-                    Icon(
-                      Icons.event_busy,
-                      size: 48,
-                      color: Colors.grey[400],
-                    ),
+                    Icon(Icons.event_busy, size: 48, color: Colors.grey[400]),
                     const SizedBox(height: 12),
                     Text(
                       'No upcoming classes',
@@ -474,12 +451,14 @@ class _QariHomePageState extends State<QariHomePage> {
                 ),
               )
             else
-              ...upcomingBookings.take(3).map((booking) => 
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: _buildBookingCard(booking),
-                ),
-              ),
+              ...upcomingBookings
+                  .take(3)
+                  .map(
+                    (booking) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _buildBookingCard(booking),
+                    ),
+                  ),
           ],
         );
       },
@@ -489,16 +468,18 @@ class _QariHomePageState extends State<QariHomePage> {
   Widget _buildBookingCard(Booking booking) {
     final startTime = booking.slot.startTime;
     final endTime = booking.slot.endTime;
-    
+
     final now = DateTime.now();
     final bookingDate = booking.slot.date;
-    final isToday = bookingDate.day == now.day && 
-                    bookingDate.month == now.month && 
-                    bookingDate.year == now.year;
-    final isTomorrow = bookingDate.day == now.add(const Duration(days: 1)).day && 
-                       bookingDate.month == now.add(const Duration(days: 1)).month && 
-                       bookingDate.year == now.add(const Duration(days: 1)).year;
-    
+    final isToday =
+        bookingDate.day == now.day &&
+        bookingDate.month == now.month &&
+        bookingDate.year == now.year;
+    final isTomorrow =
+        bookingDate.day == now.add(const Duration(days: 1)).day &&
+        bookingDate.month == now.add(const Duration(days: 1)).month &&
+        bookingDate.year == now.add(const Duration(days: 1)).year;
+
     String dateText;
     if (isToday) {
       dateText = 'Today';
@@ -507,12 +488,12 @@ class _QariHomePageState extends State<QariHomePage> {
     } else {
       dateText = '${bookingDate.day}/${bookingDate.month}';
     }
-    
+
     // Format time to display as HH:MM
     String formatTime(DateTime time) {
       return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
     }
-    
+
     Color cardColor;
     switch (booking.status) {
       case BookingStatus.confirmed:
@@ -528,16 +509,13 @@ class _QariHomePageState extends State<QariHomePage> {
         cardColor = Colors.red;
         break;
     }
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: cardColor.withOpacity(0.2),
-          width: 1,
-        ),
+        border: Border.all(color: cardColor.withOpacity(0.2), width: 1),
       ),
       child: Row(
         children: [
@@ -572,11 +550,7 @@ class _QariHomePageState extends State<QariHomePage> {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Icon(
-                      Icons.access_time,
-                      size: 14,
-                      color: Colors.grey[600],
-                    ),
+                    Icon(Icons.access_time, size: 14, color: Colors.grey[600]),
                     const SizedBox(width: 4),
                     Text(
                       '${formatTime(startTime)} - ${formatTime(endTime)} • $dateText',
@@ -589,7 +563,10 @@ class _QariHomePageState extends State<QariHomePage> {
                 ),
                 const SizedBox(height: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: cardColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -607,15 +584,15 @@ class _QariHomePageState extends State<QariHomePage> {
             ),
           ),
           IconButton(
-            onPressed: booking.status == BookingStatus.confirmed 
+            onPressed: booking.status == BookingStatus.confirmed
                 ? () {
                     // TODO: Start/Join session
                   }
                 : null,
             icon: Icon(
               Icons.videocam,
-              color: booking.status == BookingStatus.confirmed 
-                  ? cardColor 
+              color: booking.status == BookingStatus.confirmed
+                  ? cardColor
                   : Colors.grey[400],
             ),
           ),
@@ -628,11 +605,12 @@ class _QariHomePageState extends State<QariHomePage> {
     return Consumer<BookingProvider>(
       builder: (context, bookingProvider, child) {
         final allBookings = bookingProvider.userBookings;
-        final recentBookings = allBookings
-            .where((booking) => booking.status == BookingStatus.completed)
-            .toList()
-          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        
+        final recentBookings =
+            allBookings
+                .where((booking) => booking.status == BookingStatus.completed)
+                .toList()
+              ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -644,7 +622,7 @@ class _QariHomePageState extends State<QariHomePage> {
               ),
             ),
             const SizedBox(height: 12),
-            
+
             if (recentBookings.isEmpty)
               Container(
                 padding: const EdgeInsets.all(20),
@@ -658,11 +636,7 @@ class _QariHomePageState extends State<QariHomePage> {
                 ),
                 child: Column(
                   children: [
-                    Icon(
-                      Icons.history,
-                      size: 48,
-                      color: Colors.grey[400],
-                    ),
+                    Icon(Icons.history, size: 48, color: Colors.grey[400]),
                     const SizedBox(height: 12),
                     Text(
                       'No recent activity',
@@ -703,7 +677,7 @@ class _QariHomePageState extends State<QariHomePage> {
   String _getTimeAgo(DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
-    
+
     if (difference.inDays > 0) {
       return '${difference.inDays} day${difference.inDays == 1 ? '' : 's'} ago';
     } else if (difference.inHours > 0) {
@@ -731,11 +705,7 @@ class _QariHomePageState extends State<QariHomePage> {
               color: color.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 16,
-            ),
+            child: Icon(icon, color: color, size: 16),
           ),
           const SizedBox(width: 12),
           Expanded(

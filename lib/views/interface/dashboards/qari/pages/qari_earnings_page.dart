@@ -23,6 +23,7 @@ class _QariEarningsPageState extends State<QariEarningsPage> {
         title: Text(
           'Earnings & Payments',
           style: GoogleFonts.merriweather(
+            color: Colors.white,
             fontWeight: FontWeight.w600,
           ),
         ),

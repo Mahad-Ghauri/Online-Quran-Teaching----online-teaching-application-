@@ -17,7 +17,7 @@ class StudentDrawer extends StatelessWidget {
         children: [
           // Drawer Header
           _buildDrawerHeader(context),
-          
+
           // Navigation Items
           Expanded(
             child: ListView(
@@ -87,11 +87,11 @@ class StudentDrawer extends StatelessWidget {
                 _buildDrawerItem(
                   context,
                   icon: Icons.help_center,
-                  title: 'Help & Support',
+                  title: '& Support',
                   subtitle: 'FAQs and contact support',
                   onTap: () {
                     Navigator.pop(context);
-                    _showComingSoon(context, 'Help & Support');
+                    _showComingSoon(context, '& Support');
                   },
                 ),
                 _buildDrawerItem(
@@ -129,7 +129,7 @@ class StudentDrawer extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Footer
           _buildDrawerFooter(),
         ],
@@ -161,14 +161,10 @@ class StudentDrawer extends StatelessWidget {
               CircleAvatar(
                 radius: 30,
                 backgroundColor: Colors.white.withOpacity(0.2),
-                child: const Icon(
-                  Icons.person,
-                  size: 30,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.person, size: 30, color: Colors.white),
               ),
               const SizedBox(height: 8),
-              
+
               // Name
               Flexible(
                 child: Text(
@@ -183,25 +179,26 @@ class StudentDrawer extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 6),
-              
+
               // Status
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF2ECC71).withOpacity(0.2),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFF2ECC71).withOpacity(0.5)),
+                      border: Border.all(
+                        color: const Color(0xFF2ECC71).withOpacity(0.5),
+                      ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
-                          Icons.school,
-                          color: Colors.white,
-                          size: 10,
-                        ),
+                        const Icon(Icons.school, color: Colors.white, size: 10),
                         const SizedBox(width: 3),
                         Text(
                           'Student',
@@ -257,25 +254,15 @@ class StudentDrawer extends StatelessWidget {
           color: (iconColor ?? Colors.white).withOpacity(0.1),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Icon(
-          icon,
-          color: iconColor ?? Colors.white,
-          size: 20,
-        ),
+        child: Icon(icon, color: iconColor ?? Colors.white, size: 20),
       ),
       title: Text(
         title,
-        style: GoogleFonts.poppins(
-          fontWeight: FontWeight.w500,
-          fontSize: 14,
-        ),
+        style: GoogleFonts.poppins(fontWeight: FontWeight.w500, fontSize: 14),
       ),
       subtitle: Text(
         subtitle,
-        style: GoogleFonts.poppins(
-          fontSize: 12,
-          color: Colors.grey[600],
-        ),
+        style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
       ),
       onTap: onTap,
     );
@@ -285,9 +272,7 @@ class StudentDrawer extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: Colors.grey.withOpacity(0.2)),
-        ),
+        border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.2))),
       ),
       child: Column(
         children: [
@@ -301,19 +286,13 @@ class StudentDrawer extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             'Connecting Hearts Through Learning',
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              color: Colors.grey[600],
-            ),
+            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
             'Version 1.0.0',
-            style: GoogleFonts.poppins(
-              fontSize: 10,
-              color: Colors.grey[500],
-            ),
+            style: GoogleFonts.poppins(fontSize: 10, color: Colors.grey[500]),
           ),
         ],
       ),
@@ -354,10 +333,7 @@ class StudentDrawer extends StatelessWidget {
             Text(
               'Version: 1.0.0\n'
               'Built with ❤️ for the Islamic community',
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
             ),
           ],
         ),
@@ -412,9 +388,7 @@ class StudentDrawer extends StatelessWidget {
         content: Text('$feature - Coming Soon!'),
         backgroundColor: Theme.of(context).primaryColor,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

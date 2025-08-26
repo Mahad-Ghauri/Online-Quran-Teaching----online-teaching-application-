@@ -35,6 +35,7 @@ class _QariSchedulePageState extends State<QariSchedulePage> with SingleTickerPr
         title: Text(
           'Schedule & Availability',
           style: GoogleFonts.merriweather(
+            color: Colors.white,
             fontWeight: FontWeight.w600,
           ),
         ),

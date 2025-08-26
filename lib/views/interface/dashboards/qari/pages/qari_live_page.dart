@@ -22,6 +22,7 @@ class _QariLivePageState extends State<QariLivePage> {
         title: Text(
           'Live Sessions',
           style: GoogleFonts.merriweather(
+            color: Colors.white,
             fontWeight: FontWeight.w600,
           ),
         ),

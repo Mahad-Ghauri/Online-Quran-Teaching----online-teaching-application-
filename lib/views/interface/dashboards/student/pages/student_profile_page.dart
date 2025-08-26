@@ -55,7 +55,8 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color(0xFF3498DB).withOpacity(0.1),
+              const Color.fromARGB(255, 0, 166, 147).withOpacity(0.3),
+              const Color.fromARGB(255, 0, 166, 147).withOpacity(0.8),
               Colors.white,
             ],
           ),
@@ -72,7 +73,7 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
                   expandedHeight: 200,
                   floating: false,
                   pinned: true,
-                  backgroundColor: const Color(0xFF3498DB),
+                  backgroundColor:  Colors.teal,
                   flexibleSpace: FlexibleSpaceBar(
                     background: Container(
                       decoration: const BoxDecoration(
@@ -80,8 +81,8 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            Color(0xFF3498DB),
-                            Color(0xFF2980B9),
+                            Colors.tealAccent,
+                            Colors.teal,
                           ],
                         ),
                       ),
@@ -94,7 +95,7 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
                             CircleAvatar(
                               radius: 40,
                               backgroundColor: Colors.white.withOpacity(0.2),
-                              child: CircleAvatar(
+                            child: CircleAvatar(
                                 radius: 35,
                                 backgroundColor: Colors.white,
                                 child: Text(
@@ -195,7 +196,7 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
             style: GoogleFonts.merriweather(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 20),
@@ -308,7 +309,7 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
           style: GoogleFonts.poppins(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Colors.grey[700],
+            color: Colors.white,
           ),
         ),
         const SizedBox(height: 8),
@@ -951,7 +952,7 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
           ),
         ),
         content: Text(
-          'For support, please contact us at:\n\nEmail: support@qariconnect.com\nPhone: +1 (555) 123-4567\n\nWe are here to help!',
+          'For support, please contact us at:\n\nEmail: qariconnect67@gmail.com\nPhone: +92 303 5187275\n\nWe are here to help!',
           style: GoogleFonts.poppins(
             fontSize: 14,
             height: 1.5,
@@ -963,6 +964,7 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
             child: Text(
               'Close',
               style: GoogleFonts.poppins(
+                color: Colors.white,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -999,6 +1001,7 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
             child: Text(
               'Close',
               style: GoogleFonts.poppins(
+                color: Colors.white,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1035,6 +1038,7 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
             child: Text(
               'Close',
               style: GoogleFonts.poppins(
+                color: Colors.white,
                 fontWeight: FontWeight.w600,
               ),
             ),

@@ -41,42 +41,57 @@ class _StudentHomePageState extends State<StudentHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer3<AuthProvider, BookingProvider, QariProvider>(
-        builder: (context, authProvider, bookingProvider, qariProvider, child) {
-          if (authProvider.currentUser == null) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color.fromARGB(255, 0, 166, 147).withOpacity(0.3),
+              const Color.fromARGB(255, 0, 166, 147).withOpacity(0.8),
+              Colors.white,
+            ],
+          ),
+        ),
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 40),
+        child: Consumer3<AuthProvider, BookingProvider, QariProvider>(
+          builder:
+              (context, authProvider, bookingProvider, qariProvider, child) {
+                if (authProvider.currentUser == null) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-                // Welcome Section
-                _buildWelcomeSection(authProvider.currentUser!),
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 40),
 
-                const SizedBox(height: 30),
+                      // Welcome Section
+                      _buildWelcomeSection(authProvider.currentUser!),
 
-                // Upcoming Bookings Section
-                _buildUpcomingBookingsSection(bookingProvider),
+                      const SizedBox(height: 30),
 
-                const SizedBox(height: 30),
+                      // Upcoming Bookings Section
+                      _buildUpcomingBookingsSection(bookingProvider),
 
-                // Quick Actions Section
-                _buildQuickActionsSection(),
+                      const SizedBox(height: 30),
 
-                const SizedBox(height: 30),
+                      // Quick Actions Section
+                      _buildQuickActionsSection(),
 
-                // Recommended Qaris Section
-                _buildRecommendedQarisSection(qariProvider),
+                      const SizedBox(height: 30),
 
-                const SizedBox(height: 20),
-              ],
-            ),
-          );
-        },
+                      // Recommended Qaris Section
+                      _buildRecommendedQarisSection(qariProvider),
+
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                );
+              },
+        ),
       ),
     );
   }
@@ -386,7 +401,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
             const SizedBox(height: 5),
             Text(
               subtitle,
-              style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
+              style: GoogleFonts.poppins(fontSize: 12, color: Colors.white),
               textAlign: TextAlign.center,
             ),
           ],
@@ -457,7 +472,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
       ),
       child: Column(
         children: [
-          Icon(Icons.school_outlined, size: 40, color: Colors.grey[400]),
+          Icon(Icons.school_outlined, size: 40, color: Colors.white),
           const SizedBox(height: 10),
           Text(
             'No Qaris available',
