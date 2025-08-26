@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -33,6 +35,7 @@ class _QariSchedulePageState extends State<QariSchedulePage> with SingleTickerPr
         title: Text(
           'Schedule & Availability',
           style: GoogleFonts.merriweather(
+            color: Colors.white,
             fontWeight: FontWeight.w600,
           ),
         ),

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -27,13 +29,13 @@ class _StudentMainDashboardState extends State<StudentMainDashboard>
     super.initState();
     _pageController = PageController();
     _tabController = TabController(length: 5, vsync: this);
-    
+
     // Initialize providers
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = context.read<AuthProvider>();
       final qariProvider = context.read<QariProvider>();
       final bookingProvider = context.read<BookingProvider>();
-      
+
       authProvider.initializeAuth().then((_) {
         if (authProvider.currentUser != null) {
           // Start real-time listeners
@@ -115,6 +117,9 @@ class _StudentMainDashboardState extends State<StudentMainDashboard>
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
         elevation: 0,
+
+        // 👇 Force hamburger/drawer icon color
+        iconTheme: const IconThemeData(color: Colors.white),
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -153,7 +158,7 @@ class _StudentMainDashboardState extends State<StudentMainDashboard>
           onTap: _onNavItemTapped,
           type: BottomNavigationBarType.fixed,
           selectedItemColor: Theme.of(context).primaryColor,
-          unselectedItemColor: Colors.grey,
+          unselectedItemColor: Colors.white,
           selectedLabelStyle: GoogleFonts.poppins(
             fontSize: 12,
             fontWeight: FontWeight.w600,

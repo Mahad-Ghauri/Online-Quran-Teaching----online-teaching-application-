@@ -1,6 +1,8 @@
 // Utility functions for managing user verification field in Firestore
 // Run this once to fix existing users without isVerified field
 
+// ignore_for_file: avoid_print
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/core_models.dart';
 

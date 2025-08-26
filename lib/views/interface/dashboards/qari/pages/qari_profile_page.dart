@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, dead_code, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
@@ -61,6 +63,7 @@ class _QariProfilePageState extends State<QariProfilePage> {
         title: Text(
           'Profile',
           style: GoogleFonts.merriweather(
+            color: Colors.white,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -71,7 +74,7 @@ class _QariProfilePageState extends State<QariProfilePage> {
               child: Text(
                 'Cancel',
                 style: TextStyle(
-                  color: Colors.grey[600],
+                  color: Colors.white,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -297,6 +300,7 @@ class _QariProfilePageState extends State<QariProfilePage> {
             Text(
               'Profile Information',
               style: GoogleFonts.merriweather(
+                color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
@@ -353,7 +357,7 @@ class _QariProfilePageState extends State<QariProfilePage> {
           label,
           style: GoogleFonts.poppins(
             fontSize: 14,
-            color: Colors.grey[600],
+            color: Colors.white,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -377,7 +381,7 @@ class _QariProfilePageState extends State<QariProfilePage> {
                   Icon(
                     icon,
                     size: 20,
-                    color: Colors.grey[600],
+                    color: Colors.white,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -404,6 +408,7 @@ class _QariProfilePageState extends State<QariProfilePage> {
             Text(
               'Teaching Specialization',
               style: GoogleFonts.merriweather(
+                color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
@@ -415,7 +420,7 @@ class _QariProfilePageState extends State<QariProfilePage> {
               'Subjects',
               style: GoogleFonts.poppins(
                 fontSize: 14,
-                color: Colors.grey[600],
+                color: Colors.white,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -439,7 +444,7 @@ class _QariProfilePageState extends State<QariProfilePage> {
               'Languages',
               style: GoogleFonts.poppins(
                 fontSize: 14,
-                color: Colors.grey[600],
+                color: Colors.white,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -481,6 +486,7 @@ class _QariProfilePageState extends State<QariProfilePage> {
             Text(
               'Teaching Statistics',
               style: GoogleFonts.merriweather(
+                color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
@@ -559,6 +565,7 @@ class _QariProfilePageState extends State<QariProfilePage> {
             Text(
               'Account Settings',
               style: GoogleFonts.merriweather(
+                color: Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
@@ -620,7 +627,7 @@ class _QariProfilePageState extends State<QariProfilePage> {
     return ListTile(
       leading: Icon(
         icon,
-        color: textColor ?? Colors.grey[600],
+        color: textColor ?? Colors.white,
       ),
       title: Text(
         title,

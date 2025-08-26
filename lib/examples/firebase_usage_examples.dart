@@ -1,6 +1,8 @@
 // QariConnect Firebase Data Models Example Usage
 // This file demonstrates how to use the core Firebase models and services
 
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/core_models.dart';

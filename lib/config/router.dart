@@ -1,7 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:qari_connect/views/screens/splashscreen.dart';
-import 'package:qari_connect/views/interface/auth/auth_gate.dart';
-import 'package:qari_connect/views/interface/auth/auth_selection_screen.dart';
+import 'package:qari_connect/services/auth_gate.dart';
+import 'package:qari_connect/views/interface/authentication/auth_selection_screen.dart';
 import 'package:qari_connect/views/interface/authentication/sign_in_screen.dart';
 import 'package:qari_connect/views/interface/authentication/sign_up_screen.dart';
 import 'package:qari_connect/views/interface/dashboards/qari/qari_main_dashboard.dart';

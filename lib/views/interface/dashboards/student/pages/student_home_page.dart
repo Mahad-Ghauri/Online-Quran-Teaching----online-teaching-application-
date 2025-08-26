@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -30,7 +32,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
         authProvider.currentUser!.id,
         authProvider.currentUser!.role,
       );
-      
+
       // Start listening to verified Qaris in real-time
       qariProvider.startListeningToVerifiedQaris();
     }
@@ -40,54 +42,55 @@ class _StudentHomePageState extends State<StudentHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        width: double.infinity,
-        height: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
             colors: [
-              Theme.of(context).primaryColor.withOpacity(0.1),
+              const Color.fromARGB(255, 0, 166, 147).withOpacity(0.3),
+              const Color.fromARGB(255, 0, 166, 147).withOpacity(0.8),
               Colors.white,
             ],
           ),
         ),
-        child: Consumer3<AuthProvider, BookingProvider, QariProvider>(
-          builder: (context, authProvider, bookingProvider, qariProvider, child) {
-            if (authProvider.currentUser == null) {
-              return const Center(child: CircularProgressIndicator());
-            }
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 40),
-                  
-                  // Welcome Section
-                  _buildWelcomeSection(authProvider.currentUser!),
-                  
-                  const SizedBox(height: 30),
-                  
-                  // Upcoming Bookings Section
-                  _buildUpcomingBookingsSection(bookingProvider),
-                  
-                  const SizedBox(height: 30),
-                  
-                  // Quick Actions Section
-                  _buildQuickActionsSection(),
-                  
-                  const SizedBox(height: 30),
-                  
-                  // Recommended Qaris Section
-                  _buildRecommendedQarisSection(qariProvider),
-                  
-                  const SizedBox(height: 20),
-                ],
-              ),
-            );
-          },
+        child: Consumer3<AuthProvider, BookingProvider, QariProvider>(
+          builder:
+              (context, authProvider, bookingProvider, qariProvider, child) {
+                if (authProvider.currentUser == null) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 40),
+
+                      // Welcome Section
+                      _buildWelcomeSection(authProvider.currentUser!),
+
+                      const SizedBox(height: 30),
+
+                      // Upcoming Bookings Section
+                      _buildUpcomingBookingsSection(bookingProvider),
+
+                      const SizedBox(height: 30),
+
+                      // Quick Actions Section
+                      _buildQuickActionsSection(),
+
+                      const SizedBox(height: 30),
+
+                      // Recommended Qaris Section
+                      _buildRecommendedQarisSection(qariProvider),
+
+                      const SizedBox(height: 20),
+                    ],
+                  ),
+                );
+              },
         ),
       ),
     );
@@ -159,10 +162,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
           const SizedBox(height: 15),
           Text(
             'Continue your Quran learning journey',
-            style: GoogleFonts.poppins(
-              fontSize: 16,
-              color: Colors.grey[700],
-            ),
+            style: GoogleFonts.poppins(fontSize: 16, color: Colors.grey[700]),
           ),
         ],
       ),
@@ -181,13 +181,13 @@ class _StudentHomePageState extends State<StudentHomePage> {
               style: GoogleFonts.merriweather(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
+                color: Colors.white,
               ),
             ),
             TextButton(
               onPressed: () {
                 // Navigate to bookings page
-                DefaultTabController.of(context)?.animateTo(2);
+                DefaultTabController.of(context).animateTo(2);
               },
               child: Text(
                 'View All',
@@ -200,7 +200,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
           ],
         ),
         const SizedBox(height: 15),
-        
+
         if (bookingProvider.isLoading)
           const Center(child: CircularProgressIndicator())
         else if (bookingProvider.upcomingBookings.isEmpty)
@@ -249,10 +249,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
           const SizedBox(height: 5),
           Text(
             'Book a session with a Qari to get started',
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              color: Colors.grey[500],
-            ),
+            style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[500]),
             textAlign: TextAlign.center,
           ),
         ],
@@ -313,10 +310,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
           const SizedBox(height: 5),
           Text(
             _formatDate(booking.slot.startTime),
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
+            style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[600]),
           ),
           const Spacer(),
           Text(
@@ -341,7 +335,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
           style: GoogleFonts.merriweather(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: Colors.grey[800],
+            color: Colors.white,
           ),
         ),
         const SizedBox(height: 15),
@@ -354,7 +348,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 subtitle: 'Browse verified teachers',
                 color: const Color(0xFF3498DB),
                 onTap: () {
-                  DefaultTabController.of(context)?.animateTo(1);
+                  DefaultTabController.of(context).animateTo(1);
                 },
               ),
             ),
@@ -366,7 +360,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
                 subtitle: 'Connect to sessions',
                 color: const Color(0xFF9B59B6),
                 onTap: () {
-                  DefaultTabController.of(context)?.animateTo(3);
+                  DefaultTabController.of(context).animateTo(3);
                 },
               ),
             ),
@@ -394,11 +388,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
         ),
         child: Column(
           children: [
-            Icon(
-              icon,
-              size: 30,
-              color: color,
-            ),
+            Icon(icon, size: 30, color: color),
             const SizedBox(height: 10),
             Text(
               title,
@@ -411,10 +401,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
             const SizedBox(height: 5),
             Text(
               subtitle,
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
+              style: GoogleFonts.poppins(fontSize: 12, color: Colors.white),
               textAlign: TextAlign.center,
             ),
           ],
@@ -435,12 +422,12 @@ class _StudentHomePageState extends State<StudentHomePage> {
               style: GoogleFonts.merriweather(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
+                color: Colors.white,
               ),
             ),
             TextButton(
               onPressed: () {
-                DefaultTabController.of(context)?.animateTo(1);
+                DefaultTabController.of(context).animateTo(1);
               },
               child: Text(
                 'View All',
@@ -453,7 +440,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
           ],
         ),
         const SizedBox(height: 15),
-        
+
         if (qariProvider.isLoading)
           const Center(child: CircularProgressIndicator())
         else if (qariProvider.verifiedQaris.isEmpty)
@@ -485,11 +472,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
       ),
       child: Column(
         children: [
-          Icon(
-            Icons.school_outlined,
-            size: 40,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.school_outlined, size: 40, color: Colors.white),
           const SizedBox(height: 10),
           Text(
             'No Qaris available',
@@ -502,10 +485,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
           const SizedBox(height: 5),
           Text(
             'Check back later for verified teachers',
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              color: Colors.grey[500],
-            ),
+            style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey[500]),
             textAlign: TextAlign.center,
           ),
         ],
@@ -517,7 +497,7 @@ class _StudentHomePageState extends State<StudentHomePage> {
     return Container(
       width: 120,
       margin: const EdgeInsets.only(right: 15),
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.all(12), // Reduced from 15
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -531,54 +511,55 @@ class _StudentHomePageState extends State<StudentHomePage> {
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min, // Important: Use minimum space needed
         children: [
           CircleAvatar(
-            radius: 25,
+            radius: 22, // Reduced from 25
             backgroundColor: Theme.of(context).primaryColor,
             child: Text(
               'Q',
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 18,
+                fontSize: 16, // Reduced from 18
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8), // Reduced from 10
           Text(
             'Qari ${qari.qariId.substring(0, 8)}',
             style: GoogleFonts.poppins(
-              fontSize: 14,
+              fontSize: 13, // Reduced from 14
               fontWeight: FontWeight.w600,
               color: Colors.grey[800],
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 5),
+          const SizedBox(height: 4), // Reduced from 5
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 Icons.star,
-                size: 16,
+                size: 14, // Reduced from 16
                 color: Colors.amber,
               ),
               const SizedBox(width: 2),
               Text(
                 qari.rating.toStringAsFixed(1),
                 style: GoogleFonts.poppins(
-                  fontSize: 12,
+                  fontSize: 11, // Reduced from 12
                   color: Colors.grey[600],
                 ),
               ),
             ],
           ),
-          const Spacer(),
+          const SizedBox(height: 6), // Added small spacer instead of Spacer()
           Text(
             '\$${qari.pricing.toStringAsFixed(0)}/hr',
             style: GoogleFonts.poppins(
-              fontSize: 12,
+              fontSize: 11, // Reduced from 12
               fontWeight: FontWeight.w600,
               color: Theme.of(context).primaryColor,
             ),
@@ -603,8 +584,18 @@ class _StudentHomePageState extends State<StudentHomePage> {
 
   String _formatDate(DateTime date) {
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${months[date.month - 1]} ${date.day}';
   }

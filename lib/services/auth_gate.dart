@@ -23,7 +23,12 @@ class _AuthGateState extends State<AuthGate> {
   @override
   void initState() {
     super.initState();
-    _initializeAuthGate();
+    // Defer initialization until after first frame to avoid notifyListeners during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _initializeAuthGate();
+      }
+    });
   }
 
   @override
@@ -35,13 +40,13 @@ class _AuthGateState extends State<AuthGate> {
   Future<void> _initializeAuthGate() async {
     try {
       final authProvider = context.read<AuthProvider>();
-      
+
       // Initialize auth state from stored session
       await authProvider.initializeAuth();
-      
+
       // Listen to Firebase auth changes
       _listenToAuthChanges();
-      
+
       // Navigate based on current auth state
       if (authProvider.isAuthenticated) {
         await _navigateToUserDashboard(authProvider.currentUser!.role);
@@ -60,15 +65,15 @@ class _AuthGateState extends State<AuthGate> {
     _authSub?.cancel();
     _authSub = FirebaseAuth.instance.authStateChanges().listen((user) async {
       if (!mounted) return;
-      
+
       final authProvider = context.read<AuthProvider>();
-      
+
       if (user == null) {
-        debugPrint('� Auth Gate - User signed out');
+        debugPrint('[Auth Gate] User signed out');
         await authProvider.signOut();
         _showAuthSelection();
       } else {
-        debugPrint('� Auth Gate - User signed in: ${user.uid}');
+        debugPrint('[Auth Gate] User signed in: ${user.uid}');
         // Auth provider will handle the user profile loading
         if (authProvider.isAuthenticated) {
           await _navigateToUserDashboard(authProvider.currentUser!.role);
@@ -79,7 +84,7 @@ class _AuthGateState extends State<AuthGate> {
 
   Future<void> _navigateToUserDashboard(UserRole userRole) async {
     if (!mounted) return;
-    
+
     switch (userRole) {
       case UserRole.qari:
         _safeGo('/qari-dashboard');
@@ -116,7 +121,7 @@ class _AuthGateState extends State<AuthGate> {
         if (_isLoading || authProvider.isLoading) {
           return const SplashScreen();
         }
-        
+
         // This should not be reached as navigation happens in initState
         // But just in case, show splash screen
         return const SplashScreen();

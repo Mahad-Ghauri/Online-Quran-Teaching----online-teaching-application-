@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -20,6 +22,7 @@ class _QariLivePageState extends State<QariLivePage> {
         title: Text(
           'Live Sessions',
           style: GoogleFonts.merriweather(
+            color: Colors.white,
             fontWeight: FontWeight.w600,
           ),
         ),
