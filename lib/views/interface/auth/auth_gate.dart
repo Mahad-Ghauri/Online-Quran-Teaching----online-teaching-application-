@@ -88,9 +88,7 @@ class _AuthGateState extends State<AuthGate> {
         _safeGo('/student-dashboard');
         break;
       case UserRole.admin:
-        // For now, redirect admin to qari dashboard
-        // TODO: Create admin dashboard
-        _safeGo('/qari-dashboard');
+        _safeGo('/admin-dashboard');
         break;
     }
   }

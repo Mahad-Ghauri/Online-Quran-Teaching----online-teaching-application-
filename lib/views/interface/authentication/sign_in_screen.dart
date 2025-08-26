@@ -47,6 +47,8 @@ class _SignInScreenState extends State<SignInScreen> {
         final userRole = authProvider.currentUser!.role;
         if (userRole == UserRole.qari) {
           context.go('/qari-dashboard');
+        } else if (userRole == UserRole.admin) {
+          context.go('/admin-dashboard');
         } else {
           context.go('/student-dashboard');
         }

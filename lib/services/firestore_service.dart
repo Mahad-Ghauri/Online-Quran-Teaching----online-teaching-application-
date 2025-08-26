@@ -66,6 +66,18 @@ class FirestoreService {
     }
   }
 
+  /// Get all users (Admin only)
+  static Future<List<UserModel>> getAllUsers() async {
+    try {
+      final snapshot = await _users.get();
+      return snapshot.docs
+          .map((doc) => UserModel.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to get all users: $e');
+    }
+  }
+
   /// Get current user profile
   static Future<UserModel?> getCurrentUserProfile() async {
     final user = _auth.currentUser;
