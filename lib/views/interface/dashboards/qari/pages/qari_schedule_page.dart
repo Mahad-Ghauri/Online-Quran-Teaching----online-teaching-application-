@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../../../providers/app_providers.dart';
 import '../../../../../models/core_models.dart';
+import '../../../../../components/live_session_widget.dart';
 
 class QariSchedulePage extends StatefulWidget {
   const QariSchedulePage({super.key});
@@ -491,6 +492,15 @@ class _BookingsTab extends StatelessWidget {
                 fontSize: 14,
                 color: Colors.grey[600],
               ),
+            ),
+            const SizedBox(height: 12),
+            // Live Session Button for confirmed bookings
+            QuickSessionButton(
+              booking: booking,
+              onSessionStarted: () {
+                // Refresh bookings after session
+                // The parent widget will handle state refresh
+              },
             ),
           ],
         ),

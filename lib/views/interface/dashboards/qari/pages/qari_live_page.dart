@@ -1,7 +1,12 @@
-// ignore_for_file: deprecated_member_use
+
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import '../../../../../providers/app_providers.dart';
+import '../../../../../models/core_models.dart';
+import '../../../../../components/live_session_widget.dart';
 
 class QariLivePage extends StatefulWidget {
   const QariLivePage({super.key});
@@ -10,123 +15,191 @@ class QariLivePage extends StatefulWidget {
   State<QariLivePage> createState() => _QariLivePageState();
 }
 
-class _QariLivePageState extends State<QariLivePage> {
-  bool _isInSession = false;
-  bool _isMicMuted = false;
-  bool _isVideoOff = false;
+class _QariLivePageState extends State<QariLivePage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _startRealTimeListening();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _startRealTimeListening() {
+    final authProvider = context.read<AuthProvider>();
+    final bookingProvider = context.read<BookingProvider>();
+
+    if (authProvider.currentUser != null) {
+      bookingProvider.startListeningToUserBookings(
+        authProvider.currentUser!.id,
+        authProvider.currentUser!.role,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Live Sessions',
-          style: GoogleFonts.merriweather(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              const Color(0xFF27AE60).withOpacity(0.1),
+              Colors.white,
+            ],
           ),
         ),
-        actions: [
-          if (_isInSession)
-            IconButton(
-              onPressed: _endSession,
-              icon: const Icon(Icons.call_end),
-              color: Colors.red,
-            ),
-        ],
+        child: Consumer2<AuthProvider, BookingProvider>(
+          builder: (context, authProvider, bookingProvider, child) {
+            if (authProvider.currentUser == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            return Column(
+              children: [
+                const SizedBox(height: 40),
+                
+                // Header
+                _buildHeader(bookingProvider),
+                
+                // Tab Bar
+                _buildTabBar(),
+                
+                // Tab Views
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildTodaySessionsList(bookingProvider),
+                      _buildUpcomingSessionsList(bookingProvider),
+                      _buildLiveSessionHistory(bookingProvider),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
-      body: _isInSession ? _buildActiveSession() : _buildSessionOptions(),
     );
   }
 
-  Widget _buildSessionOptions() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
+  Widget _buildHeader(BookingProvider bookingProvider) {
+    final todaySessions = _getTodaySessions(bookingProvider);
+    final upcomingSessions = _getUpcomingSessions(bookingProvider);
+    final confirmedBookings = bookingProvider.getBookingsByStatus(BookingStatus.confirmed).length;
+
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 0,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Quick Start Section
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.videocam,
-                          color: Colors.red,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Start Instant Session',
-                              style: GoogleFonts.poppins(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Create a room for immediate teaching',
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: _startInstantSession,
-                      icon: const Icon(Icons.videocam),
-                      label: const Text('Go Live Now'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                    ),
-                  ),
-                ],
+          Row(
+            children: [
+              Icon(
+                Icons.live_tv,
+                color: Colors.red,
+                size: 28,
               ),
-            ),
+              const SizedBox(width: 12),
+              Text(
+                'Live Sessions',
+                style: GoogleFonts.merriweather(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 15),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  'Today',
+                  todaySessions.length.toString(),
+                  const Color(0xFF27AE60),
+                  Icons.today,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildStatCard(
+                  'Upcoming',
+                  upcomingSessions.length.toString(),
+                  const Color(0xFF3498DB),
+                  Icons.upcoming,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _buildStatCard(
+                  'Total',
+                  confirmedBookings.toString(),
+                  const Color(0xFFF39C12),
+                  Icons.video_call,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
-          // Scheduled Sessions
+  Widget _buildStatCard(String label, String value, Color color, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            color: color,
+            size: 24,
+          ),
+          const SizedBox(height: 8),
           Text(
-            'Scheduled Sessions',
+            value,
             style: GoogleFonts.merriweather(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: color,
             ),
           ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _mockScheduledSessions.length,
-              itemBuilder: (context, index) {
-                final session = _mockScheduledSessions[index];
-                return _buildScheduledSessionCard(session);
-              },
+          Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              color: Colors.grey[600],
             ),
           ),
         ],
@@ -134,23 +207,169 @@ class _QariLivePageState extends State<QariLivePage> {
     );
   }
 
-  Widget _buildScheduledSessionCard(Map<String, dynamic> session) {
+  Widget _buildTabBar() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 0,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TabBar(
+        controller: _tabController,
+        indicatorColor: const Color(0xFF27AE60),
+        labelColor: const Color(0xFF27AE60),
+        unselectedLabelColor: Colors.grey[600],
+        labelStyle: GoogleFonts.poppins(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: GoogleFonts.poppins(
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+        ),
+        tabs: const [
+          Tab(text: 'Today\'s Sessions'),
+          Tab(text: 'Upcoming'),
+          Tab(text: 'History'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTodaySessionsList(BookingProvider bookingProvider) {
+    final todaySessions = _getTodaySessions(bookingProvider);
+    
+    return Consumer<BookingProvider>(
+      builder: (context, bookingProvider, child) {
+        if (bookingProvider.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (bookingProvider.error != null) {
+          return _buildErrorState('Error loading today\'s sessions');
+        }
+
+        if (todaySessions.isEmpty) {
+          return _buildEmptyState(
+            'No sessions today',
+            'Your confirmed sessions for today will appear here',
+            Icons.today,
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: todaySessions.length,
+          itemBuilder: (context, index) {
+            final booking = todaySessions[index];
+            return _buildSessionCard(booking, isToday: true);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildUpcomingSessionsList(BookingProvider bookingProvider) {
+    final upcomingSessions = _getUpcomingSessions(bookingProvider);
+    
+    return Consumer<BookingProvider>(
+      builder: (context, bookingProvider, child) {
+        if (bookingProvider.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (bookingProvider.error != null) {
+          return _buildErrorState('Error loading upcoming sessions');
+        }
+
+        if (upcomingSessions.isEmpty) {
+          return _buildEmptyState(
+            'No upcoming sessions',
+            'Your future confirmed sessions will appear here',
+            Icons.upcoming,
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: upcomingSessions.length,
+          itemBuilder: (context, index) {
+            final booking = upcomingSessions[index];
+            return _buildSessionCard(booking, isToday: false);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildLiveSessionHistory(BookingProvider bookingProvider) {
+    final completedSessions = bookingProvider.getBookingsByStatus(BookingStatus.completed);
+    
+    return Consumer<BookingProvider>(
+      builder: (context, bookingProvider, child) {
+        if (bookingProvider.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (bookingProvider.error != null) {
+          return _buildErrorState('Error loading session history');
+        }
+
+        if (completedSessions.isEmpty) {
+          return _buildEmptyState(
+            'No session history',
+            'Your completed sessions will appear here',
+            Icons.history,
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: completedSessions.length,
+          itemBuilder: (context, index) {
+            final booking = completedSessions[index];
+            return _buildHistoryCard(booking);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildSessionCard(Booking booking, {required bool isToday}) {
     final now = DateTime.now();
-    final sessionTime = DateTime.parse(session['datetime']);
-    final canStart = sessionTime.isBefore(now.add(const Duration(minutes: 15))) &&
+    final sessionTime = booking.slot.startTime;
+    final canStart = isToday && 
+                    sessionTime.isBefore(now.add(const Duration(minutes: 15))) &&
                     sessionTime.isAfter(now.subtract(const Duration(minutes: 5)));
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: canStart 
-              ? Colors.green.withOpacity(0.3)
-              : Colors.grey.withOpacity(0.3),
+              ? Colors.green.withOpacity(0.5)
+              : Colors.grey.withOpacity(0.2),
+          width: canStart ? 2 : 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 0,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,11 +377,14 @@ class _QariLivePageState extends State<QariLivePage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                session['subject'],
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
+              Expanded(
+                child: Text(
+                  'Quran Session',
+                  style: GoogleFonts.merriweather(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: Colors.grey[800],
+                  ),
                 ),
               ),
               if (canStart)
@@ -172,28 +394,62 @@ class _QariLivePageState extends State<QariLivePage> {
                     color: Colors.green.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Text(
-                    'READY',
-                    style: GoogleFonts.poppins(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.green,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: const BoxDecoration(
+                          color: Colors.green,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'READY TO START',
+                        style: GoogleFonts.poppins(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+              const SizedBox(width: 6),
+              Text(
+                _formatSessionTime(booking.slot),
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Icon(Icons.timer, size: 16, color: Colors.grey[600]),
+              const SizedBox(width: 6),
+              Text(
+                _getSessionDuration(booking.slot),
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(
-                Icons.person,
-                size: 16,
-                color: Colors.grey[600],
-              ),
-              const SizedBox(width: 4),
+              Icon(Icons.attach_money, size: 16, color: Colors.grey[600]),
+              const SizedBox(width: 6),
               Text(
-                session['studentName'],
+                '\$${booking.price.toStringAsFixed(2)}',
                 style: GoogleFonts.poppins(
                   fontSize: 14,
                   color: Colors.grey[600],
@@ -201,20 +457,71 @@ class _QariLivePageState extends State<QariLivePage> {
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 16),
+          
+          // Live Session Widget
+          LiveSessionWidget(
+            booking: booking,
+            showJoinButton: canStart || !isToday,
+            onSessionStarted: () {
+              // Optional: Show a success message or update UI
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Session started successfully!'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHistoryCard(Booking booking) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.withOpacity(0.2)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 0,
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(
-                Icons.access_time,
-                size: 16,
-                color: Colors.grey[600],
-              ),
-              const SizedBox(width: 4),
               Text(
-                session['time'],
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  color: Colors.grey[600],
+                'Completed Session',
+                style: GoogleFonts.merriweather(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  color: Colors.grey[800],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  'COMPLETED',
+                  style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.green,
+                  ),
                 ),
               ),
             ],
@@ -222,23 +529,38 @@ class _QariLivePageState extends State<QariLivePage> {
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: canStart ? () => _startScheduledSession(session) : null,
-                  icon: const Icon(Icons.videocam),
-                  label: Text(canStart ? 'Start Session' : 'Not Ready'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: canStart ? Colors.green : Colors.grey,
-                    foregroundColor: Colors.white,
-                  ),
+              Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
+              const SizedBox(width: 6),
+              Text(
+                _formatSessionDate(booking.slot.startTime),
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.grey[600],
                 ),
               ),
-              const SizedBox(width: 8),
-              OutlinedButton(
-                onPressed: () {
-                  _showSessionDetails(session);
-                },
-                child: const Text('Details'),
+              const SizedBox(width: 16),
+              Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+              const SizedBox(width: 6),
+              Text(
+                _formatSessionTime(booking.slot),
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(Icons.attach_money, size: 16, color: Colors.grey[600]),
+              const SizedBox(width: 6),
+              Text(
+                '\$${booking.price.toStringAsFixed(2)}',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
               ),
             ],
           ),
@@ -247,161 +569,35 @@ class _QariLivePageState extends State<QariLivePage> {
     );
   }
 
-  Widget _buildActiveSession() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.black87,
-            Colors.black54,
-          ],
-        ),
-      ),
+  Widget _buildEmptyState(String title, String subtitle, IconData icon) {
+    return Center(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Session Info
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'LIVE',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Tajweed Basics Session',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Text(
-                        'Student: Ahmed Al-Rashid',
-                        style: GoogleFonts.poppins(
-                          color: Colors.white70,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Text(
-                  '23:45', // Session timer
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+          Icon(
+            icon,
+            size: 80,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 20),
+          Text(
+            title,
+            style: GoogleFonts.merriweather(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[600],
             ),
           ),
-
-          // Video Area (Placeholder)
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.black26,
-                borderRadius: BorderRadius.circular(12),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: Colors.grey[500],
               ),
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      _isVideoOff ? Icons.videocam_off : Icons.videocam,
-                      color: Colors.white,
-                      size: 48,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      _isVideoOff ? 'Camera Off' : 'Live Video',
-                      style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // Session Controls
-          Container(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildControlButton(
-                  icon: _isMicMuted ? Icons.mic_off : Icons.mic,
-                  label: _isMicMuted ? 'Unmute' : 'Mute',
-                  color: _isMicMuted ? Colors.red : Colors.green,
-                  onPressed: () {
-                    setState(() {
-                      _isMicMuted = !_isMicMuted;
-                    });
-                  },
-                ),
-                _buildControlButton(
-                  icon: _isVideoOff ? Icons.videocam_off : Icons.videocam,
-                  label: _isVideoOff ? 'Camera On' : 'Camera Off',
-                  color: _isVideoOff ? Colors.red : Colors.green,
-                  onPressed: () {
-                    setState(() {
-                      _isVideoOff = !_isVideoOff;
-                    });
-                  },
-                ),
-                _buildControlButton(
-                  icon: Icons.screen_share,
-                  label: 'Share',
-                  color: Colors.blue,
-                  onPressed: () {
-                    // TODO: Implement screen sharing
-                  },
-                ),
-                _buildControlButton(
-                  icon: Icons.call_end,
-                  label: 'End',
-                  color: Colors.red,
-                  onPressed: _endSession,
-                ),
-              ],
             ),
           ),
         ],
@@ -409,138 +605,86 @@ class _QariLivePageState extends State<QariLivePage> {
     );
   }
 
-  Widget _buildControlButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        GestureDetector(
-          onTap: onPressed,
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: color),
-            ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 24,
+  Widget _buildErrorState(String message) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: 60,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 15),
+          Text(
+            message,
+            style: GoogleFonts.merriweather(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[600],
             ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: GoogleFonts.poppins(
-            color: Colors.white,
-            fontSize: 12,
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _startInstantSession() {
-    // TODO: Create instant Jitsi room
-    setState(() {
-      _isInSession = true;
-    });
-  }
-
-  void _startScheduledSession(Map<String, dynamic> session) {
-    // TODO: Join scheduled Jitsi room
-    setState(() {
-      _isInSession = true;
-    });
-  }
-
-  void _endSession() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('End Session'),
-        content: const Text('Are you sure you want to end this session?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
+          const SizedBox(height: 15),
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context);
-              setState(() {
-                _isInSession = false;
-                _isMicMuted = false;
-                _isVideoOff = false;
-              });
+              _startRealTimeListening();
             },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('End Session'),
+            child: const Text('Retry'),
           ),
         ],
       ),
     );
   }
 
-  void _showSessionDetails(Map<String, dynamic> session) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(session['subject']),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Student: ${session['studentName']}'),
-            const SizedBox(height: 8),
-            Text('Time: ${session['time']}'),
-            const SizedBox(height: 8),
-            Text('Duration: ${session['duration']}'),
-            const SizedBox(height: 8),
-            Text('Room ID: ${session['roomId']}'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
-    );
+  List<Booking> _getTodaySessions(BookingProvider bookingProvider) {
+    final today = DateTime.now();
+    final confirmedBookings = bookingProvider.getBookingsByStatus(BookingStatus.confirmed);
+    
+    return confirmedBookings.where((booking) {
+      final sessionDate = booking.slot.startTime;
+      return sessionDate.year == today.year &&
+             sessionDate.month == today.month &&
+             sessionDate.day == today.day;
+    }).toList();
   }
 
-  // Mock data
-  static const List<Map<String, dynamic>> _mockScheduledSessions = [
-    {
-      'subject': 'Tajweed Basics',
-      'studentName': 'Ahmed Al-Rashid',
-      'time': '2:00 PM - 3:00 PM',
-      'datetime': '2025-08-25T14:00:00Z',
-      'duration': '60 minutes',
-      'roomId': 'qari-ahmed-20250825-1400',
-    },
-    {
-      'subject': 'Quran Memorization',
-      'studentName': 'Fatima Khan',
-      'time': '4:00 PM - 5:00 PM',
-      'datetime': '2025-08-25T16:00:00Z',
-      'duration': '60 minutes',
-      'roomId': 'qari-fatima-20250825-1600',
-    },
-    {
-      'subject': 'Arabic Grammar',
-      'studentName': 'Omar Hassan',
-      'time': '10:00 AM - 11:00 AM',
-      'datetime': '2025-08-26T10:00:00Z',
-      'duration': '60 minutes',
-      'roomId': 'qari-omar-20250826-1000',
-    },
-  ];
+  List<Booking> _getUpcomingSessions(BookingProvider bookingProvider) {
+    final today = DateTime.now();
+    final confirmedBookings = bookingProvider.getBookingsByStatus(BookingStatus.confirmed);
+    
+    return confirmedBookings.where((booking) {
+      final sessionDate = booking.slot.startTime;
+      return sessionDate.isAfter(DateTime(today.year, today.month, today.day + 1));
+    }).toList();
+  }
+
+  String _formatSessionTime(TimeSlot slot) {
+    final startTime = slot.startTime;
+    final endTime = slot.endTime;
+    final startFormatted = '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}';
+    final endFormatted = '${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}';
+    return '$startFormatted - $endFormatted';
+  }
+
+  String _formatSessionDate(DateTime date) {
+    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
+  String _getSessionDuration(TimeSlot slot) {
+    final duration = slot.endTime.difference(slot.startTime);
+    final minutes = duration.inMinutes;
+    if (minutes >= 60) {
+      final hours = minutes ~/ 60;
+      final remainingMinutes = minutes % 60;
+      if (remainingMinutes == 0) {
+        return '${hours}h';
+      } else {
+        return '${hours}h ${remainingMinutes}m';
+      }
+    } else {
+      return '${minutes}m';
+    }
+  }
 }

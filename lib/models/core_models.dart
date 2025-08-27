@@ -161,19 +161,25 @@ class Booking {
 
   /// Create Booking from Firestore document
   factory Booking.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return Booking(
-      id: doc.id,
-      studentId: data['studentId'] ?? '',
-      qariId: data['qariId'] ?? '',
-      slot: TimeSlot.fromMap(data['slot'] as Map<String, dynamic>),
-      status: BookingStatus.values.firstWhere(
-        (status) => status.name.toLowerCase() == (data['status'] ?? '').toLowerCase(),
-        orElse: () => BookingStatus.pending,
-      ),
-      price: (data['price'] ?? 0).toDouble(),
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-    );
+    try {
+      final data = doc.data() as Map<String, dynamic>;
+      return Booking(
+        id: doc.id,
+        studentId: data['studentId'] ?? '',
+        qariId: data['qariId'] ?? '',
+        slot: TimeSlot.fromMap(data['slot'] as Map<String, dynamic>? ?? {}),
+        status: BookingStatus.values.firstWhere(
+          (status) => status.name.toLowerCase() == (data['status'] ?? '').toLowerCase(),
+          orElse: () => BookingStatus.pending,
+        ),
+        price: (data['price'] ?? 0).toDouble(),
+        createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      );
+    } catch (e) {
+      print('Error parsing booking ${doc.id}: $e');
+      print('Document data: ${doc.data()}');
+      rethrow;
+    }
   }
 
   /// Convert Booking to Firestore document
@@ -326,9 +332,9 @@ class TimeSlot {
   /// Create TimeSlot from Map
   factory TimeSlot.fromMap(Map<String, dynamic> map) {
     return TimeSlot(
-      date: (map['date'] as Timestamp).toDate(),
-      startTime: (map['startTime'] as Timestamp).toDate(),
-      endTime: (map['endTime'] as Timestamp).toDate(),
+      date: (map['date'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      startTime: (map['startTime'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      endTime: (map['endTime'] as Timestamp?)?.toDate() ?? DateTime.now().add(const Duration(hours: 1)),
     );
   }
 

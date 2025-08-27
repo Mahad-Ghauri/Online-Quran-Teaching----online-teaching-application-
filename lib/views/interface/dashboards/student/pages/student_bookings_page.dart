@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../../../providers/app_providers.dart';
 import '../../../../../models/core_models.dart';
+import '../../../../../components/live_session_widget.dart';
 
 class StudentBookingsPage extends StatefulWidget {
   const StudentBookingsPage({super.key});
@@ -534,38 +535,31 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
             
             // Action Buttons
             if (booking.status == BookingStatus.pending || booking.status == BookingStatus.confirmed)
-              Row(
+              Column(
                 children: [
                   if (booking.status == BookingStatus.confirmed) ...[
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          _joinSession(booking);
-                        },
-                        icon: const Icon(Icons.videocam, size: 18),
-                        label: Text(
-                          'Join Session',
-                          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF27AE60),
-                          side: const BorderSide(color: Color(0xFF27AE60)),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
+                    // Live Session Widget
+                    QuickSessionButton(
+                      booking: booking,
+                      onSessionStarted: () {
+                        // Refresh bookings after session
+                        if (mounted) {
+                          setState(() {});
+                        }
+                      },
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(height: 10),
                   ],
-                  Expanded(
+                  // Cancel Button
+                  SizedBox(
+                    width: double.infinity,
                     child: OutlinedButton.icon(
                       onPressed: () {
                         _cancelBooking(booking);
                       },
                       icon: const Icon(Icons.cancel, size: 18),
                       label: Text(
-                        'Cancel',
+                        'Cancel Booking',
                         style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                       ),
                       style: OutlinedButton.styleFrom(
@@ -604,71 +598,6 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
     ];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
-  }
-
-  void _joinSession(Booking booking) {
-    // Navigate to live session page
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        title: Row(
-          children: [
-            Icon(
-              Icons.videocam,
-              color: const Color(0xFF27AE60),
-              size: 28,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'Join Session',
-              style: GoogleFonts.merriweather(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          'You will be connected to your Qari for the scheduled session.',
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            height: 1.5,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[600],
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // Navigate to live page
-              DefaultTabController.of(context).animateTo(3);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF27AE60),
-            ),
-            child: Text(
-              'Join Now',
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   void _cancelBooking(Booking booking) {

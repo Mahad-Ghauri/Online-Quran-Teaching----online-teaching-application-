@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../../../../providers/app_providers.dart';
 import '../../../../../models/core_models.dart';
+import '../../../../../components/live_session_widget.dart';
 
 class QariHomePage extends StatefulWidget {
   const QariHomePage({super.key});
@@ -583,20 +584,73 @@ class _QariHomePageState extends State<QariHomePage> {
               ],
             ),
           ),
-          IconButton(
-            onPressed: booking.status == BookingStatus.confirmed
-                ? () {
-                    // TODO: Start/Join session
-                  }
-                : null,
-            icon: Icon(
-              Icons.videocam,
-              color: booking.status == BookingStatus.confirmed
-                  ? cardColor
-                  : Colors.grey[400],
-            ),
-          ),
+          // Live Session Button
+          _buildLiveSessionButton(booking),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLiveSessionButton(Booking booking) {
+    final authProvider = context.watch<AuthProvider>();
+    final currentUser = authProvider.currentUser;
+
+    if (currentUser == null || booking.status != BookingStatus.confirmed) {
+      return IconButton(
+        onPressed: null,
+        icon: Icon(
+          Icons.videocam,
+          color: Colors.grey[400],
+        ),
+      );
+    }
+
+    // Check if session is joinable (15 minutes before start time)
+    final now = DateTime.now();
+    final sessionStart = booking.slot.startTime;
+    final sessionEnd = booking.slot.endTime;
+    
+    final canJoin = now.isAfter(sessionStart.subtract(const Duration(minutes: 15))) &&
+                   now.isBefore(sessionEnd);
+
+    return IconButton(
+      onPressed: canJoin ? () => _showQuickJoinDialog(booking) : null,
+      icon: Icon(
+        Icons.videocam,
+        color: canJoin ? Colors.green : Colors.grey[400],
+      ),
+    );
+  }
+
+  void _showQuickJoinDialog(Booking booking) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Join Live Session',
+                style: GoogleFonts.merriweather(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              QuickSessionButton(
+                booking: booking,
+                onSessionStarted: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
