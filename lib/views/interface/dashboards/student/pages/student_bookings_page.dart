@@ -538,7 +538,6 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
             const SizedBox(height: 15),
 
             // Action Buttons
-<<<<<<< HEAD
             if (booking.status == BookingStatus.pending || booking.status == BookingStatus.confirmed)
               Column(
                 children: [
@@ -552,33 +551,6 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
                           setState(() {});
                         }
                       },
-=======
-            if (booking.status == BookingStatus.pending ||
-                booking.status == BookingStatus.confirmed)
-              Row(
-                children: [
-                  if (booking.status == BookingStatus.confirmed) ...[
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          _joinSession(booking);
-                        },
-                        icon: const Icon(Icons.videocam, size: 18),
-                        label: Text(
-                          'Join Session',
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF27AE60),
-                          side: const BorderSide(color: Color(0xFF27AE60)),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
->>>>>>> fb349743c1f2ec560d721b014649db437c290cb7
                     ),
                     const SizedBox(height: 10),
                   ],
@@ -642,65 +614,6 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 
-<<<<<<< HEAD
-=======
-  void _joinSession(Booking booking) {
-    // Navigate to live session page
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        title: Row(
-          children: [
-            Icon(Icons.videocam, color: const Color(0xFF27AE60), size: 28),
-            const SizedBox(width: 12),
-            Text(
-              'Join Session',
-              style: GoogleFonts.merriweather(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          'You will be connected to your Qari for the scheduled session.',
-          style: GoogleFonts.poppins(fontSize: 14, height: 1.5),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[600],
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // Navigate to live page
-              DefaultTabController.of(context).animateTo(3);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF27AE60),
-            ),
-            child: Text(
-              'Join Now',
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
->>>>>>> fb349743c1f2ec560d721b014649db437c290cb7
   void _cancelBooking(Booking booking) {
     showDialog(
       context: context,
