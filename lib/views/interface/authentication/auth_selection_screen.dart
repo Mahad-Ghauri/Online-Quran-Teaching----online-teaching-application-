@@ -65,7 +65,7 @@ class _AuthSelectionScreenState extends State<AuthSelectionScreen>
       body: GradientBackground(
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            padding: const EdgeInsets.symmetric(horizontal: 15.0),
             child: Column(
               children: [
                 Expanded(
@@ -78,19 +78,19 @@ class _AuthSelectionScreenState extends State<AuthSelectionScreen>
                         children: [
                           // Logo and App Name
                           _buildHeader(context),
-                          
-                          const SizedBox(height: 60),
-                          
+
+                          const SizedBox(height: 20),
+
                           // Welcome Text
                           _buildWelcomeText(context),
-                          
+
                           const SizedBox(height: 50),
-                          
+
                           // Role Selection Buttons
                           _buildRoleSelectionButtons(context),
-                          
+
                           const SizedBox(height: 40),
-                          
+
                           // Sign In Link
                           _buildSignInLink(context),
                         ],
@@ -98,7 +98,7 @@ class _AuthSelectionScreenState extends State<AuthSelectionScreen>
                     ),
                   ),
                 ),
-                
+
                 // Footer
                 _buildFooter(context),
               ],
@@ -148,9 +148,9 @@ class _AuthSelectionScreenState extends State<AuthSelectionScreen>
             ),
           ),
         ),
-        
-        const SizedBox(height: 20),
-        
+
+        const SizedBox(height: 10),
+
         // App Name
         Text(
           'QariConnect',
@@ -160,17 +160,19 @@ class _AuthSelectionScreenState extends State<AuthSelectionScreen>
             color: Theme.of(context).textTheme.headlineLarge?.color,
           ),
         ),
-        
-        const SizedBox(height: 8),
-        
+
+        const SizedBox(height: 40),
+
         // Tagline
-        Text(
-          'Connecting Hearts Through Learning',
-          style: GoogleFonts.poppins(
-            fontSize: 16,
-            color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
-          ),
-        ),
+        // Text(
+        //   'Connecting Hearts Through Learning',
+        //   style: GoogleFonts.poppins(
+        //     fontSize: 16,
+        //     color: Theme.of(
+        //       context,
+        //     ).textTheme.bodyMedium?.color?.withOpacity(0.7),
+        //   ),
+        // ),
       ],
     );
   }
@@ -181,20 +183,22 @@ class _AuthSelectionScreenState extends State<AuthSelectionScreen>
         Text(
           'Welcome to QariConnect!',
           style: GoogleFonts.poppins(
-            fontSize: 24,
+            fontSize: 20,
             fontWeight: FontWeight.w600,
             color: Theme.of(context).textTheme.headlineMedium?.color,
           ),
           textAlign: TextAlign.center,
         ),
-        
+
         const SizedBox(height: 12),
-        
+
         Text(
           'Choose your role to get started with your Quranic learning journey',
           style: GoogleFonts.poppins(
-            fontSize: 16,
-            color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.8),
+            fontSize: 11,
+            color: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.color?.withOpacity(0.8),
           ),
           textAlign: TextAlign.center,
         ),
@@ -238,18 +242,20 @@ class _AuthSelectionScreenState extends State<AuthSelectionScreen>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.2),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surface.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     Icons.school,
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).colorScheme.onSecondary,
                     size: 24,
                   ),
                 ),
-                
+
                 const SizedBox(width: 16),
-                
+
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -273,19 +279,19 @@ class _AuthSelectionScreenState extends State<AuthSelectionScreen>
                     ],
                   ),
                 ),
-                
+
                 Icon(
                   Icons.arrow_forward_ios,
-                  color: Theme.of(context).primaryColor,
+                  color: Theme.of(context).colorScheme.onSecondary,
                   size: 16,
                 ),
               ],
             ),
           ),
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Student Button
         GestureDetector(
           onTap: () => _navigateToSignUp('student'),
@@ -319,18 +325,20 @@ class _AuthSelectionScreenState extends State<AuthSelectionScreen>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2ECC71).withOpacity(0.2),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surface.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.person,
-                    color: Color(0xFF2ECC71),
+                    color: Theme.of(context).colorScheme.onSecondary,
                     size: 24,
                   ),
                 ),
-                
+
                 const SizedBox(width: 16),
-                
+
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -354,10 +362,10 @@ class _AuthSelectionScreenState extends State<AuthSelectionScreen>
                     ],
                   ),
                 ),
-                
+
                 const Icon(
                   Icons.arrow_forward_ios,
-                  color: Color(0xFF2ECC71),
+                  color: Colors.white,
                   size: 16,
                 ),
               ],
@@ -376,7 +384,9 @@ class _AuthSelectionScreenState extends State<AuthSelectionScreen>
           'Already have an account? ',
           style: GoogleFonts.poppins(
             fontSize: 14,
-            color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+            color: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.color?.withOpacity(0.7),
           ),
         ),
         GestureDetector(
@@ -386,7 +396,7 @@ class _AuthSelectionScreenState extends State<AuthSelectionScreen>
             style: GoogleFonts.poppins(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).primaryColor,
+              color: Theme.of(context).colorScheme.onSecondary,
             ),
           ),
         ),
