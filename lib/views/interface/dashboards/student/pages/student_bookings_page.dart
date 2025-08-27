@@ -53,7 +53,9 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color(0xFF3498DB).withOpacity(0.1),
+              const Color.fromARGB(255, 0, 166, 147).withOpacity(0.3),
+              const Color.fromARGB(255, 0, 166, 147).withOpacity(0.6),
+              const Color.fromARGB(255, 0, 166, 147).withOpacity(0.9),
               Colors.white,
             ],
           ),
@@ -67,35 +69,43 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
             return Column(
               children: [
                 const SizedBox(height: 40),
-                
+
                 // Header
                 _buildHeader(bookingProvider),
-                
+
                 // Tab Bar
                 _buildTabBar(),
-                
+
                 // Tab Views
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,
                     children: [
                       _buildBookingsList(
-                        bookingProvider.getBookingsByStatus(BookingStatus.pending),
+                        bookingProvider.getBookingsByStatus(
+                          BookingStatus.pending,
+                        ),
                         'No pending bookings',
                         'Your booking requests will appear here',
                       ),
                       _buildBookingsList(
-                        bookingProvider.getBookingsByStatus(BookingStatus.confirmed),
+                        bookingProvider.getBookingsByStatus(
+                          BookingStatus.confirmed,
+                        ),
                         'No confirmed bookings',
                         'Your confirmed sessions will appear here',
                       ),
                       _buildBookingsList(
-                        bookingProvider.getBookingsByStatus(BookingStatus.completed),
+                        bookingProvider.getBookingsByStatus(
+                          BookingStatus.completed,
+                        ),
                         'No completed sessions',
                         'Your past sessions will appear here',
                       ),
                       _buildBookingsList(
-                        bookingProvider.getBookingsByStatus(BookingStatus.cancelled),
+                        bookingProvider.getBookingsByStatus(
+                          BookingStatus.cancelled,
+                        ),
                         'No cancelled bookings',
                         'Cancelled sessions will appear here',
                       ),
@@ -112,8 +122,12 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
 
   Widget _buildHeader(BookingProvider bookingProvider) {
     final totalBookings = bookingProvider.userBookings.length;
-    final pendingBookings = bookingProvider.getBookingsByStatus(BookingStatus.pending).length;
-    final confirmedBookings = bookingProvider.getBookingsByStatus(BookingStatus.confirmed).length;
+    final pendingBookings = bookingProvider
+        .getBookingsByStatus(BookingStatus.pending)
+        .length;
+    final confirmedBookings = bookingProvider
+        .getBookingsByStatus(BookingStatus.confirmed)
+        .length;
 
     return Container(
       margin: const EdgeInsets.all(16),
@@ -177,7 +191,12 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
     );
   }
 
-  Widget _buildStatCard(String label, String value, Color color, IconData icon) {
+  Widget _buildStatCard(
+    String label,
+    String value,
+    Color color,
+    IconData icon,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -186,11 +205,7 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            color: color,
-            size: 24,
-          ),
+          Icon(icon, color: color, size: 24),
           const SizedBox(height: 8),
           Text(
             value,
@@ -202,10 +217,7 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
           ),
           Text(
             label,
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              color: Colors.grey[600],
-            ),
+            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
           ),
         ],
       ),
@@ -251,7 +263,11 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
     );
   }
 
-  Widget _buildBookingsList(List<Booking> bookings, String emptyTitle, String emptySubtitle) {
+  Widget _buildBookingsList(
+    List<Booking> bookings,
+    String emptyTitle,
+    String emptySubtitle,
+  ) {
     return Consumer<BookingProvider>(
       builder: (context, bookingProvider, child) {
         if (bookingProvider.isLoading) {
@@ -263,11 +279,7 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 60,
-                  color: Colors.grey[400],
-                ),
+                Icon(Icons.error_outline, size: 60, color: Colors.grey[400]),
                 const SizedBox(height: 15),
                 Text(
                   'Error loading bookings',
@@ -301,11 +313,7 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.book_outlined,
-                  size: 60,
-                  color: Colors.grey[400],
-                ),
+                Icon(Icons.book_outlined, size: 60, color: Colors.grey[400]),
                 const SizedBox(height: 15),
                 Text(
                   emptyTitle,
@@ -427,9 +435,9 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 15),
-            
+
             // Date and Time
             Container(
               padding: const EdgeInsets.all(15),
@@ -508,17 +516,13 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 15),
-            
+
             // Booking Info
             Row(
               children: [
-                Icon(
-                  Icons.info_outline,
-                  size: 16,
-                  color: Colors.grey[600],
-                ),
+                Icon(Icons.info_outline, size: 16, color: Colors.grey[600]),
                 const SizedBox(width: 8),
                 Text(
                   'Booked on ${_formatDate(booking.createdAt)}',
@@ -529,11 +533,12 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 15),
-            
+
             // Action Buttons
-            if (booking.status == BookingStatus.pending || booking.status == BookingStatus.confirmed)
+            if (booking.status == BookingStatus.pending ||
+                booking.status == BookingStatus.confirmed)
               Row(
                 children: [
                   if (booking.status == BookingStatus.confirmed) ...[
@@ -545,7 +550,9 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
                         icon: const Icon(Icons.videocam, size: 18),
                         label: Text(
                           'Join Session',
-                          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: const Color(0xFF27AE60),
@@ -600,8 +607,18 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
 
   String _formatDate(DateTime date) {
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
@@ -611,16 +628,10 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         title: Row(
           children: [
-            Icon(
-              Icons.videocam,
-              color: const Color(0xFF27AE60),
-              size: 28,
-            ),
+            Icon(Icons.videocam, color: const Color(0xFF27AE60), size: 28),
             const SizedBox(width: 12),
             Text(
               'Join Session',
@@ -633,10 +644,7 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
         ),
         content: Text(
           'You will be connected to your Qari for the scheduled session.',
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            height: 1.5,
-          ),
+          style: GoogleFonts.poppins(fontSize: 14, height: 1.5),
         ),
         actions: [
           TextButton(
@@ -675,16 +683,10 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         title: Row(
           children: [
-            Icon(
-              Icons.warning,
-              color: const Color(0xFFE74C3C),
-              size: 28,
-            ),
+            Icon(Icons.warning, color: const Color(0xFFE74C3C), size: 28),
             const SizedBox(width: 12),
             Text(
               'Cancel Booking',
@@ -697,10 +699,7 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
         ),
         content: Text(
           'Are you sure you want to cancel this booking? This action cannot be undone.',
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            height: 1.5,
-          ),
+          style: GoogleFonts.poppins(fontSize: 14, height: 1.5),
         ),
         actions: [
           TextButton(
@@ -716,13 +715,13 @@ class _StudentBookingsPageState extends State<StudentBookingsPage>
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              
+
               final bookingProvider = context.read<BookingProvider>();
               final success = await bookingProvider.updateBookingStatus(
                 booking.id,
                 BookingStatus.cancelled,
               );
-              
+
               if (success && mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(

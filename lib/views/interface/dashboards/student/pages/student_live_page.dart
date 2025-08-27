@@ -41,7 +41,7 @@ class _StudentLivePageState extends State<StudentLivePage> {
       final now = DateTime.now();
       final liveBookings = bookingProvider.userBookings.where((booking) {
         if (booking.status != BookingStatus.confirmed) return false;
-        
+
         final sessionStart = DateTime(
           booking.slot.date.year,
           booking.slot.date.month,
@@ -49,7 +49,7 @@ class _StudentLivePageState extends State<StudentLivePage> {
           booking.slot.startTime.hour,
           booking.slot.startTime.minute,
         );
-        
+
         final sessionEnd = DateTime(
           booking.slot.date.year,
           booking.slot.date.month,
@@ -57,7 +57,7 @@ class _StudentLivePageState extends State<StudentLivePage> {
           booking.slot.endTime.hour,
           booking.slot.endTime.minute,
         );
-        
+
         return now.isAfter(sessionStart) && now.isBefore(sessionEnd);
       }).toList();
 
@@ -95,24 +95,28 @@ class _StudentLivePageState extends State<StudentLivePage> {
     final today = DateTime.now();
     final upcomingToday = bookingProvider.userBookings.where((booking) {
       if (booking.status != BookingStatus.confirmed) return false;
-      
+
       return booking.slot.date.year == today.year &&
-             booking.slot.date.month == today.month &&
-             booking.slot.date.day == today.day;
+          booking.slot.date.month == today.month &&
+          booking.slot.date.day == today.day;
     }).toList();
 
-    upcomingToday.sort((a, b) => a.slot.startTime.hour.compareTo(b.slot.startTime.hour));
+    upcomingToday.sort(
+      (a, b) => a.slot.startTime.hour.compareTo(b.slot.startTime.hour),
+    );
 
     return Container(
       width: double.infinity,
       height: double.infinity,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Color(0xFF1E3A8A),
-            Color(0xFF3B82F6),
+            const Color.fromARGB(255, 0, 166, 147).withOpacity(0.3),
+            const Color.fromARGB(255, 0, 166, 147).withOpacity(0.6),
+            const Color.fromARGB(255, 0, 166, 147).withOpacity(0.9),
+            Colors.white,
           ],
         ),
       ),
@@ -124,13 +128,14 @@ class _StudentLivePageState extends State<StudentLivePage> {
             children: [
               // Live Session Header
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(25),
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.2),
-                  ),
+                  border: Border.all(color: Colors.white.withOpacity(0.2)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -201,14 +206,15 @@ class _StudentLivePageState extends State<StudentLivePage> {
                   icon: const Icon(Icons.calendar_today),
                   label: Text(
                     'View Bookings',
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: const Color(0xFF1E3A8A),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
@@ -263,14 +269,15 @@ class _StudentLivePageState extends State<StudentLivePage> {
                 icon: const Icon(Icons.settings),
                 label: Text(
                   'Test Camera & Microphone',
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                 ),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.white,
                   side: BorderSide(color: Colors.white.withOpacity(0.5)),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25),
                   ),
@@ -292,16 +299,21 @@ class _StudentLivePageState extends State<StudentLivePage> {
       booking.slot.startTime.hour,
       booking.slot.startTime.minute,
     );
-    
-    final canJoin = now.isAfter(sessionStart.subtract(const Duration(minutes: 5)));
-    final isLive = now.isAfter(sessionStart) && 
-                   now.isBefore(DateTime(
-                     booking.slot.date.year,
-                     booking.slot.date.month,
-                     booking.slot.date.day,
-                     booking.slot.endTime.hour,
-                     booking.slot.endTime.minute,
-                   ));
+
+    final canJoin = now.isAfter(
+      sessionStart.subtract(const Duration(minutes: 5)),
+    );
+    final isLive =
+        now.isAfter(sessionStart) &&
+        now.isBefore(
+          DateTime(
+            booking.slot.date.year,
+            booking.slot.date.month,
+            booking.slot.date.day,
+            booking.slot.endTime.hour,
+            booking.slot.endTime.minute,
+          ),
+        );
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -357,7 +369,10 @@ class _StudentLivePageState extends State<StudentLivePage> {
               ),
               if (isLive)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.green,
                     borderRadius: BorderRadius.circular(12),
@@ -373,23 +388,26 @@ class _StudentLivePageState extends State<StudentLivePage> {
                 ),
             ],
           ),
-          
+
           const SizedBox(height: 15),
-          
+
           ElevatedButton.icon(
             onPressed: canJoin ? () => _joinSession(booking) : null,
-            icon: Icon(
-              isLive ? Icons.videocam : Icons.access_time,
-              size: 18,
-            ),
+            icon: Icon(isLive ? Icons.videocam : Icons.access_time, size: 18),
             label: Text(
-              isLive ? 'Join Now' : canJoin ? 'Ready to Join' : 'Not Ready',
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w600,
-              ),
+              isLive
+                  ? 'Join Now'
+                  : canJoin
+                  ? 'Ready to Join'
+                  : 'Not Ready',
+              style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: isLive ? Colors.green : canJoin ? Colors.blue : Colors.grey,
+              backgroundColor: isLive
+                  ? Colors.green
+                  : canJoin
+                  ? Colors.blue
+                  : Colors.grey,
               foregroundColor: Colors.white,
               minimumSize: const Size(double.infinity, 44),
               shape: RoundedRectangleBorder(
@@ -445,7 +463,10 @@ class _StudentLivePageState extends State<StudentLivePage> {
                       ),
                       const SizedBox(height: 10),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.green,
                           borderRadius: BorderRadius.circular(20),
@@ -463,7 +484,7 @@ class _StudentLivePageState extends State<StudentLivePage> {
                   ),
                 ),
               ),
-              
+
               // Student's video (Picture-in-picture)
               Positioned(
                 top: 60,
@@ -516,17 +537,17 @@ class _StudentLivePageState extends State<StudentLivePage> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black.withOpacity(0.7),
-                  Colors.transparent,
-                ],
+                colors: [Colors.black.withOpacity(0.7), Colors.transparent],
               ),
             ),
             child: SafeArea(
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.red,
                       borderRadius: BorderRadius.circular(12),
@@ -556,7 +577,10 @@ class _StudentLivePageState extends State<StudentLivePage> {
                   ),
                   const Spacer(),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(12),
@@ -587,10 +611,7 @@ class _StudentLivePageState extends State<StudentLivePage> {
               gradient: LinearGradient(
                 begin: Alignment.bottomCenter,
                 end: Alignment.topCenter,
-                colors: [
-                  Colors.black.withOpacity(0.8),
-                  Colors.transparent,
-                ],
+                colors: [Colors.black.withOpacity(0.8), Colors.transparent],
               ),
             ),
             child: SafeArea(
@@ -629,7 +650,9 @@ class _StudentLivePageState extends State<StudentLivePage> {
 
                   // Fullscreen
                   _buildControlButton(
-                    icon: _isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen,
+                    icon: _isFullScreen
+                        ? Icons.fullscreen_exit
+                        : Icons.fullscreen,
                     isActive: _isFullScreen,
                     onTap: () {
                       setState(() {
@@ -668,21 +691,18 @@ class _StudentLivePageState extends State<StudentLivePage> {
           color: isEndCall
               ? Colors.red
               : isActive
-                  ? Colors.white
-                  : Colors.white.withOpacity(0.2),
+              ? Colors.white
+              : Colors.white.withOpacity(0.2),
           shape: BoxShape.circle,
-          border: Border.all(
-            color: Colors.white.withOpacity(0.3),
-            width: 1,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
         ),
         child: Icon(
           icon,
           color: isEndCall
               ? Colors.white
               : isActive
-                  ? Colors.black
-                  : Colors.white,
+              ? Colors.black
+              : Colors.white,
           size: 24,
         ),
       ),
@@ -701,16 +721,10 @@ class _StudentLivePageState extends State<StudentLivePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         title: Row(
           children: [
-            const Icon(
-              Icons.call_end,
-              color: Colors.red,
-              size: 28,
-            ),
+            const Icon(Icons.call_end, color: Colors.red, size: 28),
             const SizedBox(width: 12),
             Text(
               'End Session',
@@ -723,10 +737,7 @@ class _StudentLivePageState extends State<StudentLivePage> {
         ),
         content: Text(
           'Are you sure you want to end this session?',
-          style: GoogleFonts.poppins(
-            fontSize: 14,
-            height: 1.5,
-          ),
+          style: GoogleFonts.poppins(fontSize: 14, height: 1.5),
         ),
         actions: [
           TextButton(
@@ -747,7 +758,7 @@ class _StudentLivePageState extends State<StudentLivePage> {
                 _currentBooking = null;
                 _sessionId = null;
               });
-              
+
               // Update booking status to completed
               if (_currentBooking != null) {
                 context.read<BookingProvider>().updateBookingStatus(
@@ -756,9 +767,7 @@ class _StudentLivePageState extends State<StudentLivePage> {
                 );
               }
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: Text(
               'End Session',
               style: GoogleFonts.poppins(
@@ -776,16 +785,10 @@ class _StudentLivePageState extends State<StudentLivePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         title: Row(
           children: [
-            const Icon(
-              Icons.settings,
-              color: Color(0xFF3498DB),
-              size: 28,
-            ),
+            const Icon(Icons.settings, color: Color(0xFF3498DB), size: 28),
             const SizedBox(width: 12),
             Text(
               'System Check',
@@ -810,9 +813,7 @@ class _StudentLivePageState extends State<StudentLivePage> {
             onPressed: () => Navigator.pop(context),
             child: Text(
               'All Good!',
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w600,
-              ),
+              style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -857,9 +858,7 @@ class _StudentLivePageState extends State<StudentLivePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         title: Text(
           'Session Settings',
           style: GoogleFonts.merriweather(
@@ -872,30 +871,21 @@ class _StudentLivePageState extends State<StudentLivePage> {
           children: [
             ListTile(
               leading: const Icon(Icons.volume_up),
-              title: Text(
-                'Audio Settings',
-                style: GoogleFonts.poppins(),
-              ),
+              title: Text('Audio Settings', style: GoogleFonts.poppins()),
               onTap: () {
                 // Audio settings
               },
             ),
             ListTile(
               leading: const Icon(Icons.video_settings),
-              title: Text(
-                'Video Settings',
-                style: GoogleFonts.poppins(),
-              ),
+              title: Text('Video Settings', style: GoogleFonts.poppins()),
               onTap: () {
                 // Video settings
               },
             ),
             ListTile(
               leading: const Icon(Icons.record_voice_over),
-              title: Text(
-                'Recording',
-                style: GoogleFonts.poppins(),
-              ),
+              title: Text('Recording', style: GoogleFonts.poppins()),
               trailing: Switch(
                 value: false,
                 onChanged: (value) {
@@ -910,9 +900,7 @@ class _StudentLivePageState extends State<StudentLivePage> {
             onPressed: () => Navigator.pop(context),
             child: Text(
               'Close',
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w600,
-              ),
+              style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
             ),
           ),
         ],

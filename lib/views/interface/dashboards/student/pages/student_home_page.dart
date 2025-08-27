@@ -48,7 +48,8 @@ class _StudentHomePageState extends State<StudentHomePage> {
             end: Alignment.bottomRight,
             colors: [
               const Color.fromARGB(255, 0, 166, 147).withOpacity(0.3),
-              const Color.fromARGB(255, 0, 166, 147).withOpacity(0.8),
+              const Color.fromARGB(255, 0, 166, 147).withOpacity(0.6),
+              const Color.fromARGB(255, 0, 166, 147).withOpacity(0.9),
               Colors.white,
             ],
           ),

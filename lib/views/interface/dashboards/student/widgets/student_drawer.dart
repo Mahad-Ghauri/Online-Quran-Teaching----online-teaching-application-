@@ -13,6 +13,7 @@ class StudentDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      // backgroundColor: Theme.of(context).colorScheme.S,
       child: Column(
         children: [
           // Drawer Header
@@ -305,7 +306,10 @@ class StudentDrawer extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: Text(
           'About QariConnect',
-          style: GoogleFonts.merriweather(fontWeight: FontWeight.w600),
+          style: GoogleFonts.merriweather(
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
