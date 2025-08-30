@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'dart:async';
 import '../services/agora_service.dart';
+import '../services/session_time_service.dart';
 import '../models/core_models.dart';
 
 class AgoraVideoCallPage extends StatefulWidget {
@@ -27,11 +29,13 @@ class _AgoraVideoCallPageState extends State<AgoraVideoCallPage> {
   int? _remoteUid;
   String? _errorMessage;
   String? _channelName; // Store the channel name for video rendering
+  Timer? _sessionTimer;
 
   @override
   void initState() {
     super.initState();
     _initializeCall();
+    _startSessionTimer();
   }
 
   Future<void> _initializeCall() async {
@@ -83,16 +87,98 @@ class _AgoraVideoCallPageState extends State<AgoraVideoCallPage> {
     }
   }
 
+  void _startSessionTimer() {
+    // Check if session has already ended
+    if (SessionTimeService.hasSessionEnded(widget.booking)) {
+      _endSessionDueToTimeout();
+      return;
+    }
+    
+    // Start timer that updates every minute and checks for session end
+    _sessionTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      if (mounted) {
+        setState(() {});
+      }
+      
+      // End session when time is up
+      if (SessionTimeService.hasSessionEnded(widget.booking)) {
+        _endSessionDueToTimeout();
+      }
+      
+      // Show warnings based on remaining time
+      final warningMessage = SessionTimeService.getWarningMessage(widget.booking);
+      if (warningMessage != null) {
+        _showTimeWarning(warningMessage);
+      }
+    });
+  }
+
+  void _showTimeWarning(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.orange,
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    }
+  }
+
+  void _endSessionDueToTimeout() {
+    _sessionTimer?.cancel();
+    
+    if (mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          title: const Text('Session Ended'),
+          content: const Text('The scheduled session time has ended. Thank you for learning with QariConnect!'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+                Navigator.of(context).pop(); // Close video call page
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  String _getFormattedRemainingTime() {
+    return SessionTimeService.getFormattedRemainingTime(widget.booking);
+  }
+
+  @override
+  void dispose() {
+    _sessionTimer?.cancel();
+    _agoraService.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text(
-          widget.isQari 
-            ? 'Teaching Student'
-            : 'Learning Session',
-          style: const TextStyle(color: Colors.white),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.isQari 
+                ? 'Teaching Student'
+                : 'Learning Session',
+              style: const TextStyle(color: Colors.white, fontSize: 18),
+            ),
+            Text(
+              _getFormattedRemainingTime(),
+              style: const TextStyle(color: Colors.white70, fontSize: 12),
+            ),
+          ],
         ),
         backgroundColor: Colors.black,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -355,9 +441,4 @@ class _AgoraVideoCallPageState extends State<AgoraVideoCallPage> {
     }
   }
 
-  @override
-  void dispose() {
-    _agoraService.dispose();
-    super.dispose();
-  }
 }

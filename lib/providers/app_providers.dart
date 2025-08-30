@@ -355,6 +355,105 @@ class QariProvider extends ChangeNotifier {
     }
   }
 
+  /// Add availability slot to current Qari profile
+  Future<bool> addAvailabilitySlot(TimeSlot newSlot) async {
+    if (_currentQariProfile == null) {
+      _setError('No Qari profile found');
+      return false;
+    }
+
+    _setLoading(true);
+    try {
+      // Check for overlapping slots
+      final currentSlots = _currentQariProfile!.availableSlots;
+      for (final existingSlot in currentSlots) {
+        if (newSlot.overlapsWith(existingSlot)) {
+          _setError('This time slot overlaps with an existing availability slot');
+          return false;
+        }
+      }
+
+      // Add new slot to the list
+      final updatedSlots = [...currentSlots, newSlot];
+      
+      // Update the profile with new slots
+      final updatedProfile = _currentQariProfile!.copyWith(
+        availableSlots: updatedSlots,
+      );
+      
+      // Save to Firebase
+      await FirestoreService.updateQariProfile(
+        _currentQariProfile!.qariId,
+        {'availableSlots': updatedSlots.map((slot) => slot.toMap()).toList()},
+      );
+      
+      // Update local state
+      _currentQariProfile = updatedProfile;
+      
+      // Update in verified Qaris list as well
+      final index = _verifiedQaris.indexWhere((q) => q.qariId == _currentQariProfile!.qariId);
+      if (index != -1) {
+        _verifiedQaris[index] = updatedProfile;
+      }
+      
+      _clearError();
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _setError('Failed to add availability slot: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Remove availability slot from current Qari profile
+  Future<bool> removeAvailabilitySlot(TimeSlot slotToRemove) async {
+    if (_currentQariProfile == null) {
+      _setError('No Qari profile found');
+      return false;
+    }
+
+    _setLoading(true);
+    try {
+      // Remove the slot from the list
+      final updatedSlots = _currentQariProfile!.availableSlots.where((slot) {
+        return !(slot.date.isAtSameMomentAs(slotToRemove.date) &&
+                slot.startTime.isAtSameMomentAs(slotToRemove.startTime) &&
+                slot.endTime.isAtSameMomentAs(slotToRemove.endTime));
+      }).toList();
+      
+      // Update the profile
+      final updatedProfile = _currentQariProfile!.copyWith(
+        availableSlots: updatedSlots,
+      );
+      
+      // Save to Firebase
+      await FirestoreService.updateQariProfile(
+        _currentQariProfile!.qariId,
+        {'availableSlots': updatedSlots.map((slot) => slot.toMap()).toList()},
+      );
+      
+      // Update local state
+      _currentQariProfile = updatedProfile;
+      
+      // Update in verified Qaris list as well
+      final index = _verifiedQaris.indexWhere((q) => q.qariId == _currentQariProfile!.qariId);
+      if (index != -1) {
+        _verifiedQaris[index] = updatedProfile;
+      }
+      
+      _clearError();
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _setError('Failed to remove availability slot: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   /// Search Qaris by name or bio
   List<QariProfile> searchQaris(String query) {
     if (query.isEmpty) return _verifiedQaris;

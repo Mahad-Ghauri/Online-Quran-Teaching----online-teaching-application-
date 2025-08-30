@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_providers.dart';
 import '../models/core_models.dart';
+import '../services/session_time_service.dart';
 import 'agora_video_call_page.dart';
 
 class LiveSessionWidget extends StatelessWidget {
@@ -70,9 +71,7 @@ class LiveSessionWidget extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                isQari 
-                  ? 'Start a live teaching session'
-                  : 'Join your scheduled session',
+                _getSessionStatusMessage(isQari),
                 style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 14,
@@ -112,8 +111,11 @@ class LiveSessionWidget extends StatelessWidget {
   }
 
   bool _canStartSession(bool isQari) {
-    // For now, allow sessions if booking is confirmed
-    return booking.status == BookingStatus.confirmed;
+    return SessionTimeService.canStartSession(booking);
+  }
+
+  String _getSessionStatusMessage(bool isQari) {
+    return SessionTimeService.getSessionStatusMessage(booking, isQari);
   }
 
   void _startSession(BuildContext context, bool isQari) {
@@ -166,21 +168,45 @@ class QuickSessionButton extends StatelessWidget {
         if (currentUser == null) return const SizedBox.shrink();
 
         final bool isQari = currentUser.role == UserRole.qari;
+        final bool canStart = _canStartQuickSession();
         
         return ElevatedButton.icon(
-          onPressed: booking.status == BookingStatus.confirmed 
+          onPressed: canStart 
             ? () => _startQuickSession(context, isQari)
             : null,
           icon: Icon(icon ?? Icons.video_call),
-          label: Text(label),
+          label: Text(canStart ? label : _getQuickSessionStatus()),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green,
+            backgroundColor: canStart ? Colors.green : Colors.grey,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           ),
         );
       },
     );
+  }
+
+  bool _canStartQuickSession() {
+    return SessionTimeService.canStartSession(booking);
+  }
+
+  String _getQuickSessionStatus() {
+    final validation = SessionTimeService.validateSessionTime(booking);
+    
+    if (!validation.canStart) {
+      final timeUntil = SessionTimeService.getTimeUntilStart(booking);
+      if (timeUntil.inHours > 0) {
+        return 'Starts in ${timeUntil.inHours}h';
+      } else if (timeUntil.inMinutes > 0) {
+        return 'Starts in ${timeUntil.inMinutes}m';
+      } else if (SessionTimeService.hasSessionEnded(booking)) {
+        return 'Ended';
+      } else {
+        return 'Not Ready';
+      }
+    }
+
+    return 'Ready';
   }
 
   void _startQuickSession(BuildContext context, bool isQari) {

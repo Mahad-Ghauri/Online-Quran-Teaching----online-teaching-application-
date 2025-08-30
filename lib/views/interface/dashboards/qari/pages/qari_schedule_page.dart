@@ -307,14 +307,107 @@ class _AvailabilityTab extends StatelessWidget {
                   child: Text('Delete'),
                 ),
               ],
-              onSelected: (value) {
-                // TODO: Handle edit/delete
+              onSelected: (value) async {
+                if (value == 'delete') {
+                  await _deleteAvailabilitySlot(context, slot);
+                } else if (value == 'edit') {
+                  // TODO: Implement edit functionality
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Edit functionality coming soon!'),
+                    ),
+                  );
+                }
               },
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _deleteAvailabilitySlot(BuildContext context, TimeSlot slot) async {
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'Delete Availability Slot',
+          style: GoogleFonts.merriweather(fontWeight: FontWeight.w600),
+        ),
+        content: const Text(
+          'Are you sure you want to delete this availability slot?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    try {
+      // Remove the slot using QariProvider
+      final qariProvider = Provider.of<QariProvider>(context, listen: false);
+      final success = await qariProvider.removeAvailabilitySlot(slot);
+
+      if (context.mounted) {
+        // Close loading dialog
+        Navigator.of(context).pop();
+
+        if (success) {
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Availability slot deleted successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          // Show error message
+          final error = qariProvider.error ?? 'Failed to delete availability slot';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(error),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        // Close loading dialog
+        Navigator.of(context).pop();
+        
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
 
@@ -620,9 +713,8 @@ class _AddAvailabilityDialogState extends State<_AddAvailabilityDialog> {
           child: const Text('Cancel'),
         ),
         ElevatedButton(
-          onPressed: _canSave() ? () {
-            // TODO: Save availability
-            Navigator.of(context).pop();
+          onPressed: _canSave() ? () async {
+            await _saveAvailabilitySlot();
           } : null,
           child: const Text('Save'),
         ),
@@ -632,5 +724,108 @@ class _AddAvailabilityDialogState extends State<_AddAvailabilityDialog> {
 
   bool _canSave() {
     return selectedDay != null && startTime != null && endTime != null;
+  }
+
+  Future<void> _saveAvailabilitySlot() async {
+    if (!_canSave()) return;
+
+    // Calculate the next occurrence of the selected day
+    final now = DateTime.now();
+    final dayIndex = days.indexOf(selectedDay!) + 1; // Monday = 1, Sunday = 7
+    final daysUntilTarget = (dayIndex - now.weekday) % 7;
+    final targetDate = now.add(Duration(days: daysUntilTarget));
+
+    // Create DateTime objects for start and end times on the target date
+    final startDateTime = DateTime(
+      targetDate.year,
+      targetDate.month,
+      targetDate.day,
+      startTime!.hour,
+      startTime!.minute,
+    );
+
+    final endDateTime = DateTime(
+      targetDate.year,
+      targetDate.month,
+      targetDate.day,
+      endTime!.hour,
+      endTime!.minute,
+    );
+
+    // Validate that end time is after start time
+    if (endDateTime.isBefore(startDateTime) || endDateTime.isAtSameMomentAs(startDateTime)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('End time must be after start time'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
+    // Create the time slot
+    final timeSlot = TimeSlot(
+      date: targetDate,
+      startTime: startDateTime,
+      endTime: endDateTime,
+    );
+
+    // Show loading indicator
+    if (mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    try {
+      // Add the slot using QariProvider
+      final qariProvider = Provider.of<QariProvider>(context, listen: false);
+      final success = await qariProvider.addAvailabilitySlot(timeSlot);
+
+      if (mounted) {
+        // Close loading dialog
+        Navigator.of(context).pop();
+
+        if (success) {
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Availability slot added successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          // Close the dialog
+          Navigator.of(context).pop();
+        } else {
+          // Show error message
+          final error = qariProvider.error ?? 'Failed to add availability slot';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(error),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        // Close loading dialog
+        Navigator.of(context).pop();
+        
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
